@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
 detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+predictor = dlib.shape_predictor("../../dep/shape_predictor_68_face_landmarks.dat")
 
 # rectangle to bounding box
 def rect_to_bb(rect):

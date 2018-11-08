@@ -7,7 +7,7 @@ if __name__ == "__main__":
     timess = []
 
     # open videoCapture and videoWriter
-    video = cv2.VideoCapture("in.mov")
+    video = cv2.VideoCapture("../../data/video/in.mov")
     fps = video.get(cv2.CAP_PROP_FPS)
     # box = [47, 56, 619, 343] # right small
     # box = [63, 87, 607, 325] # right big
@@ -32,10 +32,10 @@ if __name__ == "__main__":
             break
         print("%f, %f"%(t, value))
 
-    # release memory and destroy windows
-    video.release()
-    cv2.destroyAllWindows()
-
     import matplotlib.pyplot as plt
     plt.plot(timess,values)
     plt.show()
+
+    # release memory and destroy windows
+    video.release()
+    cv2.destroyAllWindows()

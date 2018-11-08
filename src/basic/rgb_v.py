@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 # http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
 detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("shape_predictor_5_face_landmarks.dat")
+predictor = dlib.shape_predictor("../../dep/shape_predictor_68_face_landmarks.dat")
 
 # rectangle to bounding box
 def rect_to_bb(rect):
@@ -58,7 +58,7 @@ def detect(image):
     # for all faces
     for (i, rect) in enumerate(rects):
         shape = predictor(gray, rect)
-        shape = shape_to_np(shape, 5)
+        shape = shape_to_np(shape, 68)
 
         # get face area
         (x, y, w, h) = rect_to_bb(rect)
@@ -67,22 +67,17 @@ def detect(image):
         cv2.putText(image, "Face #{}".format(i + 1), (x - 10, y - 10),
             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-        # draw feature points
-        for (x, y) in shape:
-            cv2.circle(image, (x, y), 2, (0, 0, 255), -1)
+        # left ROI
+        bb = np_to_bb([shape[2], shape[4], shape[31]])
+        cv2.rectangle(image, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
+        val1 = np.mean(np.mean(gray[bb[1]:bb[3],bb[0]:bb[2]]))
 
-        # # left ROI
-        # bb = np_to_bb([shape[2], shape[4], shape[31]])
-        # cv2.rectangle(image, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
-        # val1 = np.mean(np.mean(gray[bb[1]:bb[3],bb[0]:bb[2]]))
-
-        # # right ROI
-        # bb = np_to_bb([shape[12], shape[14], shape[35]])
-        # cv2.rectangle(image, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
-        # val2 = np.mean(np.mean(gray[bb[1]:bb[3],bb[0]:bb[2]]))
+        # right ROI
+        bb = np_to_bb([shape[12], shape[14], shape[35]])
+        cv2.rectangle(image, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
+        val2 = np.mean(np.mean(gray[bb[1]:bb[3],bb[0]:bb[2]]))
         
-        # val = (val1+val2)/2
-        val = 0
+        val = (val1+val2)/2
 
     cv2.imshow("Face Detect", image)
     return val
@@ -90,7 +85,7 @@ def detect(image):
 if __name__ == "__main__":
     # preparation
     data = []
-    video = cv2.VideoCapture("in.mov")
+    video = cv2.VideoCapture("../../data/video/in.mov")
     fps = video.get(cv2.CAP_PROP_FPS)
 
     # handle frame one by one
@@ -111,11 +106,11 @@ if __name__ == "__main__":
         if cv2.waitKey(1) & 0xFF == ord('q') or not ret:
             break
 
-    # release memory and destroy windows
-    video.release()
-    cv2.destroyAllWindows()
-
     import matplotlib.pyplot as plt
     data = np.array(data)
     plt.plot(data[:,0], data[:,1])
     plt.show()
+
+    # release memory and destroy windows
+    video.release()
+    cv2.destroyAllWindows()
