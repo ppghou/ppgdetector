@@ -11,7 +11,7 @@
     python rgb_simple.py
     ```
 
-    ![rgb_simple](/Users/suxy/学习/7-大四上/软件工程/ppgdetector/data/figure/basic/rgb_simple.png)
+    ![rgb_simple](https://raw.githubusercontent.com/ppghou/ppgdetector/master/data/figure/basic/rgb_simple.png)
 
   + rgb_c.py` : open camera and sample (about 10 frame rate)
 
@@ -20,7 +20,7 @@
     python rgb_c.py -as    # auto scale plot
     ```
 
-    ![rgb_c](/Users/suxy/学习/7-大四上/软件工程/ppgdetector/data/figure/basic/rgb_c.png)
+    ![rgb_c](https://raw.githubusercontent.com/ppghou/ppgdetector/master/data/figure/basic/rgb_c.png)
 
   + `rgb_v.py` : open a video and calculate, plot in the end
 
@@ -28,4 +28,4 @@
     python rgb_v.py
     ```
     
-    ![rgb_v](/Users/suxy/学习/7-大四上/软件工程/ppgdetector/data/figure/basic/rgb_v.png)
+    ![rgb_v](https://raw.githubusercontent.com/ppghou/ppgdetector/master/data/figure/basic/rgb_v.png)
