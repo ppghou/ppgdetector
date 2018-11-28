@@ -1,13 +1,15 @@
-import cv2
-import dlib
-import time
-import math
+import sys, time, math
+import cv2, dlib
 import numpy as np
 import matplotlib.pyplot as plt
 
 # http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
-predictorPath = r"shape_predictor_68_face_landmarks.dat"
-videoPath = r"E:\Undergraduate\10_大四秋\软件工程 董渊\软件工程课大作业\数据\20181101\PIC_0401.MP4"
+# predictorPath = r"../../dep/shape_predictor_68_face_landmarks.dat"
+# predictorRef = [[1,3,31],[13,15,35]]
+predictorPath = r"../../dep/shape_predictor_5_face_landmarks.dat"
+predictorRef = [[0,1,4],[2,3,4]]
+
+videoPath = r"../../data/video/PIC_0401.MP4"
 file = open(r'output_detect.txt', 'w')
 cv2.destroyAllWindows()
 plt.close('all')
@@ -34,13 +36,14 @@ def shape_to_np(shape, dtype="int"):
         coords: an array of point coordinates
             columns - x; y
     """
-    coords = np.zeros((68, 2), dtype=dtype)
-    for i in range(0, 68):
+    num = shape.num_parts
+    coords = np.zeros((num, 2), dtype=dtype)
+    for i in range(0, num):
         coords[i] = (shape.part(i).x, shape.part(i).y)
     return coords
 
 def np_to_bb(coords, ratio=5, dtype="int"):
-    """ Choss ROI based on points and ratio
+    """ Choose ROI based on points and ratio
     Args:
         coords: an array of point coordinates
             columns - x; y
@@ -89,6 +92,12 @@ def clip(img, size, rect):
     bottom = int(rect.bottom() / size[1] * img.shape[0])
     return img[top:bottom, left:right]
 
+def meanOfChannels(image, bb):
+    return np.mean(np.mean(image[bb[1]:bb[3],bb[0]:bb[2]],0),0)
+
+def dist(p1, p2):
+    return np.sqrt((p1.x-p2.x)**2+(p1.y-p2.y)**2)
+
 class Detector:
     """ Detect and calculate ppg signal
     roiRatio: a positive number, the roi gets bigger as it increases
@@ -97,8 +106,10 @@ class Detector:
     """
     roiRatio = 5
     smoothRatio = 0.9
-    
-    def __init__(self, detectorPath = None, predictorPath = None):
+    detectSize = 400
+    clipSize = 540
+
+    def __init__(self, detectorPath = None, predictorPath = None, predictorRef = None):
         """ Initialize the instance of Detector
         
         detector: dlib.fhog_object_detector
@@ -113,8 +124,8 @@ class Detector:
         """
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(predictorPath)
-        self.rect = None
-        self.landmarks = None
+        self.refs = predictorRef
+        self.landmarks = []
 
     def __call__(self, image):
         """ Detect the face region and returns the ROI value
@@ -126,16 +137,16 @@ class Detector:
         Return:
             val: an array of ROI value in each color channel
         """
-        val = [0, 0, 0]
-        
+        val = [0., 0., 0.]
         # Resize the image to limit the calculation
-        resized, detectionSize = resize(image, 540)
+        imageSize = image.shape
+        resized, detectionSize = resize(image, self.detectSize)
         
         # Perform face detection on a grayscale image
         gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
         # No need for upsample, because its effect is the same as resize
-        rects = self.detector(gray, upsample_num_times = 0)
-        num = len(rects) # there should be one face
+        faces = self.detector(gray, upsample_num_times = 0)
+        num = len(faces) # there should be one face
         if num == 0:
             print("No face in the frame!")
             return val
@@ -143,66 +154,43 @@ class Detector:
             print("More than one face!")
             return val
         
+        faceRect = dlib.rectangle(
+                    int(faces[0].left()*imageSize[1]/detectionSize[0]),
+                    int(faces[0].top()*imageSize[1]/detectionSize[0]),
+                    int(faces[0].right()*imageSize[1]/detectionSize[0]),
+                    int(faces[0].bottom()*imageSize[1]/detectionSize[0]))
+
         # Perform landmark prediction on the face region
-        rect = rects[0]
-        clipped, size = resize(clip(image, detectionSize, rect), 540)
-        shape = self.predictor(clipped,
-                   dlib.rectangle(0, 0, size[0], size[1]))
+        shape = self.predictor(image, faceRect)
         landmarks = shape_to_np(shape)
+        landmarks = self.update(np.array(landmarks))
+        rects = [np_to_bb(landmarks[ref], self.roiRatio) for ref in self.refs]
+        vals = [meanOfChannels(image, bb) for bb in rects]
+        val = np.mean(vals, 0)
         
-        # If not the first image, perform window smoothing
-        if (self.rect != None):
-            if (self.dist(self.rect, rect) < 0.3):
-                landmarks = self.smoothRatio * self.landmarks \
-                                + (1 - self.smoothRatio) * landmarks
-                landmarks = landmarks.astype(int)
-        
-        # Draw feature points
-        for (i, (x, y)) in enumerate(landmarks):
-            cv2.putText(clipped, "{}".format(i), (x, y),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
-        
-        # Left ROI
-        bb = np_to_bb([landmarks[1], landmarks[3], landmarks[31]], self.roiRatio)
-        cv2.rectangle(clipped, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
-        val1 = [np.mean(np.mean(clipped[bb[1]:bb[3],bb[0]:bb[2], i])) for i in range(3)]
-        
-        # Right ROI
-        bb = np_to_bb([landmarks[13], landmarks[15], landmarks[35]], self.roiRatio)
-        cv2.rectangle(clipped, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
-        val2 = [np.mean(np.mean(clipped[bb[1]:bb[3],bb[0]:bb[2], i])) for i in range(3)]
-        
-        val = np.divide(np.add(val1, val2), 2)
-        val = val1
-        
-        cv2.imshow("Face Detct #{}".format(i + 1), clipped)
-        
-        cv2.imshow("Frame", resized)
-        
-        self.rect = rect
-        self.landmarks = landmarks
+        # Show detection results
+        if '-s' in sys.argv:
+            # Draw sample rectangles
+            for bb in rects:
+                cv2.rectangle(image, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
+            # Draw feature points
+            for (i, (x, y)) in enumerate(landmarks):
+                cv2.putText(image, "{}".format(i), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
+            cv2.imshow("Face Detct #{}".format(i + 1), resize(image, self.detectSize)[0])
         return val
     
-    def dist(self, rect1, rect2):
-        """ Calculate the distance between two rectangles
-        Arg:
-            rect1, rect2: dlib.rectangle
-        Return:
-            distance between rectangles
-        """
-        distx = abs(rect1.left() - rect2.left()) \
-                    + abs(rect1.right() - rect2.right())
-        disty = abs(rect1.top() - rect2.top()) \
-                    + abs(rect1.bottom() - rect2.bottom())
-        return abs(distx / (rect1.right() - rect1.left())) \
-                    + abs(disty / (rect1.bottom() - rect1.top()))
-        
+    def update(self, landmarks):
+        if len(self.landmarks):
+            landmarks = self.smoothRatio*self.landmarks+(1-self.smoothRatio)*landmarks
+            landmarks = landmarks.astype(int)
+        self.landmarks = landmarks
+        return landmarks
 
 if __name__ == "__main__":
     # Initialization
-    detect = Detector(predictorPath = predictorPath)
+    detect = Detector(predictorPath = predictorPath, predictorRef = predictorRef)
     times = []
-    data = [[], [], []]
+    data = []
     video = cv2.VideoCapture(videoPath)
     fps = video.get(cv2.CAP_PROP_FPS)
     video.set(cv2.CAP_PROP_POS_FRAMES, 30*fps) # jump to certain frame
@@ -215,46 +203,49 @@ if __name__ == "__main__":
         calcTime = time.time()
         
         # detect
-        value = detect(frame)
+        v = detect(frame)
 
         # show result
         times.append(t)
-        for i in range(3):
-            data[i].append(value[i])
-        print("%.2f\t%.3f\t%.3f\t%.3f\t%.1f\t%.1f"%(t, value[0], value[1],
-                        value[2], fps, 1/(time.time() - calcTime)), file = file)
+        data.append(v)
+        print("%.2f\t%.3f\t%.3f\t%.3f\t%.1f\t%.1f"%(t, v[0], v[1], v[2], fps, 1/(time.time() - calcTime)) )#, file=file)
 
         # check stop or quit
         ret, frame = video.read()
         if cv2.waitKey(1) & 0xFF == ord('q') or not ret:
             break
-
+    
     # release memory and destroy windows
     video.release()
     cv2.destroyAllWindows()
     file.close()
 
     data = np.array(data)
-    for i in range(3):
-        plt.figure()
-        plt.plot(times, data[i])
-        plt.show()
-    
+    plt.figure("Original",figsize=(12,4))
+    plt.subplot(1,3,1);plt.plot(times, data[:,0]); plt.title("R")
+    plt.subplot(1,3,2);plt.plot(times, data[:,1]); plt.title("G")
+    plt.subplot(1,3,3);plt.plot(times, data[:,2]); plt.title("B")
+
     # smoothing
-    const = [3, 3, 3]
-    offset = [[0,], [0,], [0,]]
-    data_smooth = np.zeros((3, len(times)))
+    const = [1., 1., 1.]
+    offset = [0, 0, 0]
+    data_smooth = np.zeros((len(times),3))
     for i in range(len(times)):
+        data_smooth[i,:] = data[i,:]
+        if i == 0:
+            continue
         for j in range(3):
-            data_smooth[j][i] = data[j][i] 
-            if i == 0:
-                continue
-            dist = data[j][i] - data[j][i-1]
+            dist = data[i,j] - data[i-1,j]
             if abs(dist) < const[j]:
                 dist = 0
-            offset[j].append(offset[j][-1] - dist)
-            data_smooth[j][i] += offset[j][i]
-    for i in range(3):
-        plt.figure()
-        plt.plot(times, data_smooth[i])
-        plt.show()
+            offset[j] -= dist
+            data_smooth[i,j] += offset[j]
+    
+    plt.figure("Smoothed",figsize=(12,4))
+    plt.subplot(1,3,1);plt.plot(times, data_smooth[:,0]); plt.title("R")
+    plt.subplot(1,3,2);plt.plot(times, data_smooth[:,1]); plt.title("G")
+    plt.subplot(1,3,3);plt.plot(times, data_smooth[:,2]); plt.title("B")
+
+    plt.show()
+
+    
