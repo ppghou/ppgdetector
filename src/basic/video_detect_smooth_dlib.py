@@ -4,12 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
-# predictorPath = r"../../dep/shape_predictor_68_face_landmarks.dat"
-# predictorRef = [[1,3,31],[13,15,35]]
-predictorPath = r"../../dep/shape_predictor_5_face_landmarks.dat"
-predictorRef = [[0,1,4],[2,3,4]]
+predictorPath = r"../../dep/shape_predictor_68_face_landmarks.dat"
+predictorRef = [[1,3,31],[13,15,35]]
+# predictorPath = r"../../dep/shape_predictor_5_face_landmarks.dat"
+# predictorRef = [[0,1,4],[2,3,4]]
 
-videoPath = r"../../data/video/PIC_0401.MP4"
+videoPath = r"../../data/video/20181129.mov"
 file = open(r'output_detect.txt', 'w')
 cv2.destroyAllWindows()
 plt.close('all')
@@ -105,7 +105,7 @@ class Detector:
          the landmarks get stabler as it increases
     """
     roiRatio = 5
-    smoothRatio = 0.9
+    smoothRatio = 0.8
     detectSize = 400
     clipSize = 540
 
@@ -193,14 +193,14 @@ if __name__ == "__main__":
     data = []
     video = cv2.VideoCapture(videoPath)
     fps = video.get(cv2.CAP_PROP_FPS)
-    video.set(cv2.CAP_PROP_POS_FRAMES, 30*fps) # jump to certain frame
+    video.set(cv2.CAP_PROP_POS_FRAMES, 0*fps) # jump to certain frame
     
     # Handle frame one by one
     t = 0.0
     ret, frame = video.read()
+    calcTime = time.time()  
     while(video.isOpened() and t < 10):
         t += 1.0/fps
-        calcTime = time.time()
         
         # detect
         v = detect(frame)
@@ -209,7 +209,7 @@ if __name__ == "__main__":
         times.append(t)
         data.append(v)
         print("%.2f\t%.3f\t%.3f\t%.3f\t%.1f\t%.1f"%(t, v[0], v[1], v[2], fps, 1/(time.time() - calcTime)) )#, file=file)
-
+        calcTime = time.time()
         # check stop or quit
         ret, frame = video.read()
         if cv2.waitKey(1) & 0xFF == ord('q') or not ret:
