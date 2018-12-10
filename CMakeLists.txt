@@ -2,18 +2,24 @@ cmake_minimum_required(VERSION 2.8.12)
 
 find_package(opencv REQUIRED)
 add_subdirectory(dep/dlib dlib_build)
+add_definitions(-Dunix -DHAVE_FFTW)
 
-macro(add_example name)
+include_directories(dep/sigpack)
+link_directories()
+
+
+# for dlib dependent source file
+macro(add_dlib name)
    add_executable(${name} src/${name}.cpp)
    target_link_libraries(${name} dlib::dlib ${OpenCV_LIBS})
 endmacro()
 
-macro(add_gui_example name)
-   if (DLIB_NO_GUI_SUPPORT)
-      message("No GUI support, so we won't build the ${name} example.")
-   else()
-      add_example(${name})
-   endif()
+# for sigpack dependent source file
+# g++ -Wall -std=c++11 -Dunix -DHAVE_FFTW -I../sigpack -larmadillo -lfftw3
+macro(add_sigpack name)
+   add_executable(${name} src/${name}.cpp)
+   target_link_libraries(${name} )
 endmacro()
 
-add_example(ppgDetector)
+add_dlib(ppgDetector)
+add_sigpack(signalTester)
