@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 
 find_package(opencv REQUIRED)
-add_subdirectory(/Users/suxy/Workspace/dlib/dlib dlib_build)
+add_subdirectory(dep/dlib dlib_build)
 
 macro(add_example name)
    add_executable(${name} src/${name}.cpp)
