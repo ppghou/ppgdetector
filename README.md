@@ -4,10 +4,13 @@
 
 #### 0. Installation
 + Dependency:
+
+    + [CMake](https://cmake.org/) for project building
     + [dlib](https://github.com/davisking/dlib) for face detecting
     + [SigPack](http://sigpack.sourceforge.net/build.html) for C++ Signal Processing
-        + [Armadillo](http://arma.sourceforge.net/)
-+ Build
+        + [Armadillo](http://arma.sourceforge.net/) matrix math and functions likely to Matlab's
+
++ Build:
     ``` shell
     mkdir build
     cd build
