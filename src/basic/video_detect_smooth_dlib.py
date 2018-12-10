@@ -4,12 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
-predictorPath = r"../../dep/shape_predictor_68_face_landmarks.dat"
-predictorRef = [[1,3,31],[13,15,35]]
-# predictorPath = r"../../dep/shape_predictor_5_face_landmarks.dat"
-# predictorRef = [[0,1,4],[2,3,4]]
+# predictorPath = r"../../dep/shape_predictor_68_face_landmarks.dat"
+# predictorRef = [[1,3,31],[13,15,35]]
+predictorPath = r"../../dep/shape_predictor_5_face_landmarks.dat"
+predictorRef = [[0,1,4],[2,3,4]]
 
-videoPath = r"../../data/video/20181129.mov"
+videoPath = r"../../data/video/PIC_0401.MP4"
 file = open(r'output_detect.txt', 'w')
 cv2.destroyAllWindows()
 plt.close('all')
@@ -105,8 +105,8 @@ class Detector:
          the landmarks get stabler as it increases
     """
     roiRatio = 5
-    smoothRatio = 0.8
-    detectSize = 400
+    smoothRatio = 0.9
+    detectSize = 540
     clipSize = 540
 
     def __init__(self, detectorPath = None, predictorPath = None, predictorRef = None):
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     data = []
     video = cv2.VideoCapture(videoPath)
     fps = video.get(cv2.CAP_PROP_FPS)
-    video.set(cv2.CAP_PROP_POS_FRAMES, 0*fps) # jump to certain frame
+    video.set(cv2.CAP_PROP_POS_FRAMES, 30*fps) # jump to certain frame
     
     # Handle frame one by one
     t = 0.0

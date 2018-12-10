@@ -2,6 +2,14 @@
 
 “吼”组
 
+```
+# Installation
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
+
 #### 一、项目介绍
 
 ##### 1. 产品前景

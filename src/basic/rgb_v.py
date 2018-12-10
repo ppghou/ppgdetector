@@ -64,11 +64,9 @@ def detect(image):
         (x, y, w, h) = rect_to_bb(rect)
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-        cv2.putText(image, "Face #{}".format(i + 1), (x - 10, y - 10),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
         # left ROI
         bb = np_to_bb([shape[2], shape[4], shape[31]])
+        print(bb)
         cv2.rectangle(image, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
         val1 = np.mean(np.mean(gray[bb[1]:bb[3],bb[0]:bb[2]]))
 
@@ -77,6 +75,9 @@ def detect(image):
         cv2.rectangle(image, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
         val2 = np.mean(np.mean(gray[bb[1]:bb[3],bb[0]:bb[2]]))
         
+        cv2.putText(image, "Face #{}".format(i + 1), (x - 10, y - 10),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
         val = (val1+val2)/2
 
     cv2.imshow("Face Detect", image)
@@ -103,7 +104,7 @@ if __name__ == "__main__":
 
         # check stop or quit
         ret,frame = video.read()
-        if cv2.waitKey(1) & 0xFF == ord('q') or not ret:
+        if cv2.waitKey(0) & 0xFF == ord('q') or not ret:
             break
 
     import matplotlib.pyplot as plt
