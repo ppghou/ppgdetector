@@ -2,17 +2,18 @@
 
 “吼”组
 
-> Dependency:
-> ​	[dlib](https://github.com/davisking/dlib) for face detecting
-> ​	[SigPack](http://sigpack.sourceforge.net/build.html) for C++ Signal Processing
-
-```
-# Installation
-mkdir build
-cd build
-cmake ..
-cmake --build . --config Release
-```
+#### 0. Installation
++ Dependency:
+    + [dlib](https://github.com/davisking/dlib) for face detecting
+    + [SigPack](http://sigpack.sourceforge.net/build.html) for C++ Signal Processing
+        + [Armadillo](http://arma.sourceforge.net/)
++ Build
+    ``` shell
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build . --config Release
+    ```
 
 #### 一、项目介绍
 
