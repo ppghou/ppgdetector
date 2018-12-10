@@ -2,6 +2,10 @@
 
 “吼”组
 
+> Dependency:
+> ​	[dlib](https://github.com/davisking/dlib) for face detecting
+> ​	[SigPack](http://sigpack.sourceforge.net/build.html) for C++ Signal Processing
+
 ```
 # Installation
 mkdir build
