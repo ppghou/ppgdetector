@@ -7,7 +7,6 @@ add_definitions(-Dunix -DHAVE_FFTW)
 include_directories(dep/sigpack)
 link_directories()
 
-
 # for dlib dependent source file
 macro(add_dlib name)
    add_executable(${name} src/${name}.cpp)
