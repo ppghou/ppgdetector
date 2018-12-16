@@ -18,6 +18,14 @@
     cmake --build . --config Release
     ```
 
++ VLC
+
+  + MacOS
+
+    `brew install --HEAD gmerlino/vlc/vlc`
+
+    https://wiki.videolan.org/OSXCompile/
+
 #### 一、项目介绍
 
 ##### 1. 产品前景
