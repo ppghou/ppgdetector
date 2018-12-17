@@ -19,10 +19,8 @@ HEADERS    += utils.h \
 
 FORMS      += ppgViewer.ui
 
-LIBS       += -lVLCQtCore -lVLCQtWidgets
-LIBS       += 
+#LIBS       += -lVLCQtCore -lVLCQtWidgets
 
-
-# Edit below for custom library location
-LIBS       += L/Applications/VLC.app/Contents/MacOS/lib -lVLCQtCore -lVLCQtWidgets
-INCLUDEPATH += I/Applications/VLC.app/Contents/MacOS/include
+## Edit below for custom library location
+#LIBS       += L/Library/Frameworks/ -lVLCQtCore -lVLCQtWidgets
+#INCLUDEPATH += I/Applications/VLC.app/Contents/MacOS/include

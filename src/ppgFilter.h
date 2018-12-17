@@ -1,3 +1,7 @@
+/* 
+ * PPG Viewer
+ * Copyright (C) 2018 PPG Hou <https://github.com/ppghou>
+ */
 #ifndef FILTER_H
 #define FILTER_H
 

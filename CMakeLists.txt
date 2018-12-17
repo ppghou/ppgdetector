@@ -200,7 +200,7 @@ endmacro()
 # add_sigpack(ppgFilter)
 
 # EXEC: main
-add_main(ppgViewer)
+# add_main(ppgViewer)
 
 # EXEC: app
-# add_app(ppgViewer)
+add_app(ppgViewer)

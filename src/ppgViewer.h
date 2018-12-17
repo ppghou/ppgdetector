@@ -1,5 +1,9 @@
-#ifndef VIEWER_H
-#define VIEWER_H
+/* 
+ * PPG Viewer
+ * Copyright (C) 2018 PPG Hou <https://github.com/ppghou>
+ */
+#ifndef ppgViewer_H
+#define ppgViewer_H
 
 #include <QMainWindow>
 
@@ -34,7 +38,7 @@ private:
     VlcMedia *_media;
     VlcMediaPlayer *_player;
 
-    // QString lastFile;
+    QString lastFile;
 };
 
-#endif // VIEWER_H
+#endif // ppgViewer_H

@@ -1,7 +1,6 @@
-#
-# VLC-Qt Simple Player
-# Copyright (C) 2015 Tadej Novak <tadej@tano.si>
-#
+# PPG Viewer CMakeLists
+# Copyright (C) 2018 PPG Hou <https://github.com/ppghou>
+
 # Windows Extra
 
 if(MINGW OR MSVC)

@@ -1,3 +1,7 @@
+/* 
+ * PPG ppgViewer
+ * Copyright (C) 2018 PPG Hou <https://github.com/ppghou>
+ */
 #include <QtCore/QCoreApplication>
 #include <QtWidgets/QApplication>
 

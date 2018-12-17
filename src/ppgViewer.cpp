@@ -1,3 +1,7 @@
+/* 
+ * PPG Viewer
+ * Copyright (C) 2018 PPG Hou <https://github.com/ppghou>
+ */
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -10,7 +14,6 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
-
 #include "ppgViewer.h"
 #include "ui_ppgViewer.h"
 #include <fstream>
@@ -87,7 +90,7 @@ void ppgViewer::openUrl()
 }
 
 //初始化心率图
-// void Viewer::setupHeartRateChart()
+// void ppgViewer::setupHeartRateChart()
 // {
 //     QValueAxis *axisX = new QValueAxis;
 //     axisX->setRange(0, 10);           //设置范围
@@ -123,7 +126,7 @@ void ppgViewer::openUrl()
 //     ui->heartRateChart->setChart(HeartRateChart);
 // }
 
-// void Viewer::setupElectrocarChart()
+// void ppgViewer::setupElectrocarChart()
 // {
 //     QValueAxis *axisX = new QValueAxis;
 //     axisX->setRange(0, 10);          //设置范围
@@ -159,7 +162,7 @@ void ppgViewer::openUrl()
 //     ui->electrocarChart->setChart(ElectrocarChart);
 // }
 
-// void updateChart(QChart * oldChart, QLineSeries * series, double Xmin, double Xmax, double Ymin, double Ymax)
+// void ppgViewer::updateChart(QChart * oldChart, QLineSeries * series, double Xmin, double Xmax, double Ymin, double Ymax)
 // {
 //     oldChart->removeAllSeries();
 //     oldChart->addSeries(series);
@@ -171,7 +174,7 @@ void ppgViewer::openUrl()
 //     oldChart->setAxisY(oldChart->axisY(), series);
 // }
 
-// void Viewer::on_start_clicked()
+// void ppgViewer::on_start_clicked()
 // {
 //     /*if(lastFile == Q_NULLPTR)
 //         return;

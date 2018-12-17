@@ -1,6 +1,6 @@
 /**
-# VLC-Qt Simple Player
-# Copyright (C) 2015 Tadej Novak <tadej@tano.si>
+# PPG Viewer
+# Copyright (C) 2018 PPG Hou <https://github.com/ppghou>
 **/
 
 #include <windows.h>
