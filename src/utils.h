@@ -1,8 +1,15 @@
-#ifndef __UTILS__
-#define __UTILS__ 0x0101
+#ifndef __UTILS_H__
+#define __UTILS_H__
+
+#include <string>
+#include <vector>
+#include <fstream>
+#include <sstream>
+
+using namespace std;
 
 // FUNC: load data from CSV
-inline int loadCSV(const char* fileName, vector<float> &time, vector<float> &data) {
+inline int loadCSV(const char* fileName, std::vector<float> &time, std::vector<float> &data) {
     float t, R, G, B;
     string line; char c;
     ifstream file(fileName);
@@ -18,16 +25,16 @@ inline int loadCSV(const char* fileName, vector<float> &time, vector<float> &dat
 
 // FUNC: release vector content
 template <typename T>
-inline void clearVector(vector<T>& v){
-    vector<T>().swap(v);
+inline void clearVector(std::vector<T>& v){
+    std::vector<T>().swap(v);
 }
 
 // FUNC: pop last element from vector
 template <typename T>
-inline T pop_last(vector<T>& v){
+inline T pop_last(std::vector<T>& v){
     if (v.size() == 0)
         return 0;
     v.pop_back();
 }
 
-#endif
+#endif // __UTILS_H__

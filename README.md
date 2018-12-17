@@ -4,11 +4,18 @@
 
 #### 0. Installation
 + Dependency:
-
+    + [OpenCV](https://github.com/opencv/opencv/releases)
     + [CMake](https://cmake.org/) for project building
     + [dlib](https://github.com/davisking/dlib) for face detecting
     + [SigPack](http://sigpack.sourceforge.net/build.html) for C++ Signal Processing
         + [Armadillo](http://arma.sourceforge.net/) matrix math and functions likely to Matlab's
+> For Windows:
+> 	[MinGW](http://www.mingw.org/) should be installed and [MinGW_build](https://sourceforge.net/projects/mingwbuilds/files/host-windows/releases/4.8.1/64-bit/threads-posix/) has posix-thread for dlib
+> 	OpenCV should be built by MinGW instead of .exe for VC
+> 	
+
++ VLC
+  + MacOS https://wiki.videolan.org/OSXCompile/
 
 + Build:
     ``` shell
@@ -17,14 +24,6 @@
     cmake ..
     cmake --build . --config Release
     ```
-
-+ VLC
-
-  + MacOS
-
-    `brew install --HEAD gmerlino/vlc/vlc`
-
-    https://wiki.videolan.org/OSXCompile/
 
 #### 一、项目介绍
 
