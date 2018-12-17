@@ -2,28 +2,7 @@
 
 “吼”组
 
-#### 0. Installation
-+ Dependency:
-    + [OpenCV](https://github.com/opencv/opencv/releases)
-    + [CMake](https://cmake.org/) for project building
-    + [dlib](https://github.com/davisking/dlib) for face detecting
-    + [SigPack](http://sigpack.sourceforge.net/build.html) for C++ Signal Processing
-        + [Armadillo](http://arma.sourceforge.net/) matrix math and functions likely to Matlab's
-> For Windows:
-> 	[MinGW](http://www.mingw.org/) should be installed and [MinGW_build](https://sourceforge.net/projects/mingwbuilds/files/host-windows/releases/4.8.1/64-bit/threads-posix/) has posix-thread for dlib
-> 	OpenCV should be built by MinGW instead of .exe for VC
-> 	
-
-+ VLC
-  + MacOS https://wiki.videolan.org/OSXCompile/
-
-+ Build:
-    ``` shell
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build . --config Release
-    ```
+[![Macos](https://img.shields.io/badge/MacOS-PASSED-GREEN.svg)](./doc/INSTALL_MacOS.md)[![MinGW](https://img.shields.io/badge/MinGW-PROCESSING-LIGHTCORAL.svg)](./doc/INSTALL_MinGW.md)
 
 #### 一、项目介绍
 
@@ -49,12 +28,12 @@
 
 + **顾炜伦、胡彦**：人脸检测及检测选框算法
   + [x] 初步：检测人脸后确定选框计算表征心率的值，优化选框位置抖动现象，基本实现有效的信号采集功能；
-  + [ ] 进阶：选择合适方法提取信号，如比较均值与其他滤波、不同相机、不同颜色空间等；C++版本；
+  + [x] 进阶：选择合适方法提取信号，如比较均值与其他滤波、不同相机、不同颜色空间等；C++版本；
 + **席大鹏、吴研**：图形界面开发
   + [ ] 初步：学习 `Qt`，尝试使用 `Qt` 基本功能、视频流获取与显示、文件浏览器等；
   + [ ] 进阶：使用 `Qt` 开发界面；集成 OpenCV；PyQt 链接及 对应 makefile 编译相关内容；
 + **刘雨辰、何炜华**：信号滤波与心率提取
-  + [ ] 初步：对检测组得到的信号进行滤波，得到平滑且不失真的心率信号；提取基本信息如周期、幅值等；信号切片与格式化保存（为训练做初步准备）；
+  + [x] 初步：对检测组得到的信号进行滤波，得到平滑且不失真的心率信号；提取基本信息如周期、幅值等；信号切片与格式化保存（为训练做初步准备）；
   + [ ] 进阶：使用在线算法；训练神经网络识别简单情绪；
 + **苏星宇**：统筹及相关
   + [x] 初步：各部分需求与接口设计，确立时间节点，完善任务分配；协助各组；
