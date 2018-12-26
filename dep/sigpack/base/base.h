@@ -201,7 +201,7 @@ namespace sp
     ////////////////////////////////////////////////////////////////////////////////////////////
     /// \brief SigPack version string
     ////////////////////////////////////////////////////////////////////////////////////////////
-    std::string sp_version(void)
+    inline std::string sp_version(void)
     {
         return std::to_string(SP_VERSION_MAJOR)+"."+std::to_string(SP_VERSION_MINOR)+"."+std::to_string(SP_VERSION_PATCH);
     }
