@@ -7,10 +7,9 @@ import matplotlib.pyplot as plt
 import sys
 
 # http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
-predictorPath = r"shape_predictor_68_face_landmarks.dat"
+predictorPath = r"../../dep/shape_predictor_68_face_landmarks.dat"
 predictorIdx = [[1, 3, 31], [13, 15, 35]]
-#videoPath = r"E:\Undergraduate\10_大四秋\软件工程 董渊\软件工程课大作业\数据\20181109_近距离_头部不固定\视频数据\PIC_0427.MP4"
-videoPath = r"E:\Undergraduate\10_大四秋\软件工程 董渊\软件工程课大作业\数据\20181224\MVI_0005.MP4"
+videoPath = r"../../data/video.MP4"
 file = open(r'output_detect.txt', 'w')
 startTime = 12 # Start the analysis from startTime
 cv2.destroyAllWindows()
@@ -159,11 +158,8 @@ class Detector:
             smoothRatio = self.rectSmoothRatio *  \
                         math.sqrt(1 - dist / self.rectDistThres)
             print("%.3f"%(dist), end="", file = file)
-            print("%.3f %.3f"%(dist, smoothRatio))
-            print(self.rect, rect)
             if (dist < self.rectDistThres):
                 rect = self.smoothRects(self.rect, rect, smoothRatio)
-        print(rect)
         print("\t", end="", file = file)
         
         # Perform landmark prediction on the face region
