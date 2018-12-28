@@ -1,6 +1,7 @@
-#### Installation for MacOS
+#### Installation for Ubuntu
 
 [![Macos](https://img.shields.io/badge/MacOS-PASSED-GREEN.svg)](INSTALL_MacOS.md) [![Ubuntu](https://img.shields.io/badge/Ubuntu-PASSED-GREEN.svg)](INSTALL_Ubuntu.md) [![MinGW](https://img.shields.io/badge/MinGW-PROCESSING-LIGHTCORAL.svg)](INSTALL_MinGW.md)
+
 
 ##### Dependency:
 
@@ -12,11 +13,11 @@
 
 ##### Dependency installation
 
-+ OpenCV by `brew install opencv`
++ OpenCV by `sudo apt-get install opencv`
 
 + Install [dlib](https://github.com/davisking/dlib) with official steps
 + Install [Armadillo](http://arma.sourceforge.net/) and then you can use SigPack in `dep/sigpack`
-+ Install `Qt` by `brew install qt5`
++ Install `Qt` by `sudo apt-get install qt5-default qtcreator`
 
 ##### Program build
 
@@ -26,5 +27,3 @@ cd build
 cmake ..
 cmake --build . --config Release
 ```
-
-If you want to test with only executable file instead of whole `.app`, you can change the line at end of `CMakeLists.txt`.

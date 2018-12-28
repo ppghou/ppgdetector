@@ -11,26 +11,26 @@ Controller::Controller(QString videoPath)
 void Controller::run()
 {
     VideoCapture video;
-    
-    // Camera mode
-    if(m_playMode == VIDEO_MODE_CAMERA){
-        video = VideoCapture(0);
-        m_fps = 30;
-    }else{
-        video = VideoCapture(m_videoPath.toStdString());
-        m_fps = video.get(CV_CAP_PROP_FPS);
-    }
-    
-    Filter filter(m_fps);
     Detector detector;
-    // Handle frame one by one
-    m_time = 0;
-    int cnt = 0;
-    Mat frame;
-    system_clock::time_point ctime;
-    duration<double> time_span;
 
     while(1){
+        // Camera mode
+        if(m_playMode == VIDEO_MODE_CAMERA){
+            video = VideoCapture(0);
+            m_fps = 30;
+        }else{
+            video = VideoCapture(m_videoPath.toStdString());
+            m_fps = video.get(CV_CAP_PROP_FPS);
+        }
+        
+        Filter filter(m_fps);
+        // Handle frame one by one
+        m_time = 0;
+        int cnt = 0;
+        Mat frame;
+        system_clock::time_point ctime;
+        duration<double> time_span;
+
         while(video.read(frame) && m_exitState){
             cnt++;
             ctime = system_clock::now();

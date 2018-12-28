@@ -137,26 +137,30 @@ void ppgViewer::on_pushButton_start_clicked()
         m_isPlaying = true;
         ui->pushButton_start->setText("stop");
         emit signal_setPlayingState(m_isPlaying);
+        m_ppgSeries->clear();
+        m_hrSeries->clear();
         m_controller->start();
-    }   
+    }
 }
 
 //change video mode when clicked
 void ppgViewer::on_pushButton_videoMode_clicked()
 {
-    if(m_videoMode == VIDEO_MODE_CAMERA){
-        m_videoMode = VIDEO_MODE_FILE;
-        ui->pushButton_videoMode->setText("File");
-        emit signal_setVideoMode(m_videoMode);
+    if(!m_isPlaying){
+        if(m_videoMode == VIDEO_MODE_CAMERA){
+            m_videoMode = VIDEO_MODE_FILE;
+            ui->pushButton_videoMode->setText("File");
+            emit signal_setVideoMode(m_videoMode);
 
-        QString videoPath = QFileDialog::getOpenFileName(this, tr("选择需要解析的视频"),
-                            QDir::homePath(), tr("Multimedia files(*)"));
-        if (videoPath.isEmpty()) return;
-        else emit signal_setVideoPath(videoPath);
-    }
-    else if(m_videoMode == VIDEO_MODE_FILE){
-        m_videoMode = VIDEO_MODE_CAMERA;
-        ui->pushButton_videoMode->setText("Camera");
-        emit signal_setVideoMode(m_videoMode);
+            QString videoPath = QFileDialog::getOpenFileName(this, tr("选择需要解析的视频"),
+                                QDir::homePath(), tr("Multimedia files(*)"));
+            if (videoPath.isEmpty()) return;
+            else emit signal_setVideoPath(videoPath);
+        }
+        else if(m_videoMode == VIDEO_MODE_FILE){
+            m_videoMode = VIDEO_MODE_CAMERA;
+            ui->pushButton_videoMode->setText("Camera");
+            emit signal_setVideoMode(m_videoMode);
+        }
     }
 }

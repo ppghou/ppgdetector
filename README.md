@@ -2,7 +2,7 @@
 
 “吼”组
 
-[![Macos](https://img.shields.io/badge/MacOS-PASSED-GREEN.svg)](./doc/INSTALL_MacOS.md)  [![MinGW](https://img.shields.io/badge/MinGW-PROCESSING-LIGHTCORAL.svg)](./doc/INSTALL_MinGW.md)
+[![Macos](https://img.shields.io/badge/MacOS-PASSED-GREEN.svg)](./doc/INSTALL_MacOS.md) [![Ubuntu](https://img.shields.io/badge/Ubuntu-PASSED-GREEN.svg)](./doc/INSTALL_Ubuntu.md) [![MinGW](https://img.shields.io/badge/MinGW-PROCESSING-LIGHTCORAL.svg)](./doc/INSTALL_MinGW.md)
 
 #### 一、项目介绍
 
@@ -24,20 +24,20 @@
 
 ​	我们的软件能够在非接触、甚至不知情的情况下对人员的心率进行监测。因此，我们的软件及设备可以用于机动车中，用来监测司机的心率以确保驾驶的安全等。此外，在某些重大的刑事案件、或关乎国家安全等重要事件的调查中，可以在被监测方不知情的情况下检测其心率，并从而获知其基本的心理健康等状态。
 
-#### 二、初步分工
+#### 二、人员分工
 
 + **顾炜伦、胡彦**：人脸检测及检测选框算法
   + [x] 初步：检测人脸后确定选框计算表征心率的值，优化选框位置抖动现象，基本实现有效的信号采集功能；
   + [x] 进阶：选择合适方法提取信号，如比较均值与其他滤波、不同相机、不同颜色空间等；C++版本；
 + **席大鹏、吴研**：图形界面开发
-  + [ ] 初步：学习 `Qt`，尝试使用 `Qt` 基本功能、视频流获取与显示、文件浏览器等；
-  + [ ] 进阶：使用 `Qt` 开发界面；集成 OpenCV；PyQt 链接及 对应 makefile 编译相关内容；
+  + [x] 初步：学习 `Qt`，尝试使用 `Qt` 基本功能、视频流获取与显示、文件浏览器等；
+  + [x] 进阶：使用 `Qt` 开发界面；集成 OpenCV；
 + **刘雨辰、何炜华**：信号滤波与心率提取
   + [x] 初步：对检测组得到的信号进行滤波，得到平滑且不失真的心率信号；提取基本信息如周期、幅值等；信号切片与格式化保存（为训练做初步准备）；
   + [ ] 进阶：使用在线算法；训练神经网络识别简单情绪；
 + **苏星宇**：统筹及相关
   + [x] 初步：各部分需求与接口设计，确立时间节点，完善任务分配；协助各组；
-  + [ ] 进阶：协调各组完成最终软件的开发；
+  + [x] 进阶：支持 cmake 编译，协调各组完成最终软件的开发；
 + **田洋**：实验及相关
-  + [ ] 初步：实验安排及开展、基本数据处理；协助各组；
+  + [x] 初步：实验安排及开展、基本数据处理；协助各组；
   + [ ] 进阶：待定；
