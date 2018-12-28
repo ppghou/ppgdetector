@@ -1,14 +1,10 @@
-/* 
- * PPG Viewer
- * Copyright (C) 2018 PPG Hou <https://github.com/ppghou>
- */
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#ifndef __UTILS__
+#define __UTILS__
 
 #include <string>
 #include <vector>
-#include <fstream>
 #include <sstream>
+#include <fstream>
 
 using namespace std;
 
@@ -30,7 +26,7 @@ inline int loadCSV(const char* fileName, std::vector<float> &time, std::vector<f
 // FUNC: release vector content
 template <typename T>
 inline void clearVector(std::vector<T>& v){
-    std::vector<T>().swap(v);
+	std::vector<T>().swap(v);
 }
 
 // FUNC: pop last element from vector
@@ -41,4 +37,4 @@ inline T pop_last(std::vector<T>& v){
     v.pop_back();
 }
 
-#endif // __UTILS_H__
+#endif

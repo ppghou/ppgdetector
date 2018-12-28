@@ -2,65 +2,72 @@
 #define __FILTER__
 
 #include "sigpack.h"
-#include "utils.hpp"
+#include "utils.h"
 #include <string>
 #include <vector>
+#include <QObject>
 
-using namespace std;
+//using namespace std;
 using namespace sp;
 
 #define min(a,b) ((a)>(b) ? b:a)
 #define max(a,b) ((a)<(b) ? b:a)
 #define GNUPLOT 0
 
-class Filter{
+class Filter
+{
 private:
-	// Sampling frequency
+    // Sampling frequency
     double fs;
 
-	// Time interval between updates
+    // Time interval between updates
     double tUpdate;
     
-	// Filter and parameters
+    // Filter and parameters
     FIR_filt<double, double, double> G1, G2;
     int groupDelay1, groupDelay2;
 
-	// Signals
+    // Signals
     std::vector<double> raw, window;
-	std::vector<double> peak, signal, signalTmp;
-	std::vector<int> peakPos, peakPosTmp;
+    std::vector<double> peak, signal, signalTmp;
+    std::vector<int> peakPos, peakPosTmp;
+    std::vector<double> frequency, frequencyTmp;
 
-	int windowSize;
+    int windowSize;
     int findRange;
 
-	// Output parameters
-	bool outputFlag;
-	int rankSigOut;
-	int rankPeakPosOut;
+    // Output parameters
+    bool outputFlag;
+    int rankSigOut;
+    int rankPeakPosOut;
+    int frequencyPosOut;
 
     #if GNUPLOT
     gplot gp0, gp1;
     #endif
 
-	void calc();
+    void calc();
 
-	std::vector<int> findPeaks(arma::vec num, int count);
+    std::vector<int> findPeaks(arma::vec num, int count);
 
-	void update(arma::vec y, std::vector<int> peakPosWin, std::vector<double> peakWin);
+    void update(arma::vec y, std::vector<int> peakPosWin, std::vector<double> peakWin);
 
 public:
-	Filter(double samplingFrequency);
+    Filter(double samplingFrequency);
 
-	void initialize(double samplingFrequency);
+    void initialize(double samplingFrequency);
 
-	void filterInput(double data);
+    void filterInput(double data);
 
-	bool getFlag();
+    bool getFlag();
 
-	std::vector<double> getSignal();
-	
-	std::vector<int> getPeakPos();
+    std::vector<double> getSignal();
+    
+    std::vector<int> getPeakPos();
 
-	void clearTmpData();
+    std::vector<double> getFrequency();
+
+    void clearTmpData();
 };
+
 #endif
