@@ -1,11 +1,11 @@
-#include "mainwindow.h"
+#include "ppgViewer.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    w.createCharts();
+    ppgViewer window;
+    window.show();
+    window.initialize();
     return a.exec();
 }

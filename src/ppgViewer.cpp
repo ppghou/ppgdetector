@@ -1,10 +1,11 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "ppgViewer.h"
+#include "ui_ppgViewer.h"
 
-MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
+ppgViewer::ppgViewer(QWidget *parent): QMainWindow(parent), ui(new Ui::ppgViewer)
 {
     ui->setupUi(this);
-    m_controller = new Controller();
+    m_videoPath = "../data/video/PIC_0427.mp4";
+    m_controller = new Controller(m_videoPath);
     connect(m_controller, SIGNAL(signal_showImage(QImage)), this,
                             SLOT(slot_showImage(QImage)));
     connect(m_controller, SIGNAL(signal_returnPPGValue(double,double)), this,
@@ -15,37 +16,38 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                   SLOT(slot_setPlayingState(bool)));
     connect(this, SIGNAL(signal_setVideoMode(int)), m_controller,
                   SLOT(slot_setVideoMode(int)));
-    m_videoMode = 1;
+    connect(this, SIGNAL(signal_setVideoPath(QString)), m_controller,
+                  SLOT(slot_setVideoPath(QString)));
+    m_videoMode = VIDEO_MODE_CAMERA;
     m_ppgTimeSpan = 10;
     m_hrTimeSpan = 30;
     m_isPlaying = false;
 }
 
-MainWindow::~MainWindow()
+ppgViewer::~ppgViewer()
 {
     delete ui;
 }
 
-//show frame in window
-void MainWindow::slot_showImage(QImage img)
+// SLOT: show frame in window
+void ppgViewer::slot_showImage(QImage img)
 {
     ui->label->clear();
     ui->label->setScaledContents(true);
     ui->label->setPixmap(QPixmap::fromImage(img));
 }
 
-//get a new PPG data, refresh the ppg chart
-void MainWindow::slot_returnPPGValue(double time, double value)
+//SLOT: get a new PPG data, refresh the ppg chart
+void ppgViewer::slot_returnPPGValue(double time, double value)
 {
     // qDebug() << "in slot_returnPPGValue";
     // qDebug() << "value is " << value;
-    FPS = m_controller->getFps();
+    m_fps = m_controller->getFps();
     QVector<QPointF> data = m_ppgSeries->pointsVector();
     data.append(QPointF(time, value));
     m_ppgSeries->append(QPointF(time, value));
 
-    int beg = int(((time-m_ppgTimeSpan)>0?(time-m_ppgTimeSpan):0)*FPS);
-    // cout << "beg: " << beg;
+    int beg = int(((time-m_ppgTimeSpan)>0?(time-m_ppgTimeSpan):0)*m_fps);
     double max = data.at(beg).y();
     double min = data.at(beg).y();
     for(int i = beg+1;i < data.size()-1; ++i){
@@ -61,8 +63,8 @@ void MainWindow::slot_returnPPGValue(double time, double value)
         m_ppgChartView->chart()->axisX()->setRange(time-m_ppgTimeSpan, time);
 }
 
-//get a new heart rate data, refresh the hr chart
-void MainWindow::slot_returnHRValue(double time, double value)
+// SLOT: get a new heart rate data, refresh the hr chart
+void ppgViewer::slot_returnHRValue(double time, double value)
 {
     QVector<QPointF> data = m_hrSeries->pointsVector();
     data.append(QPointF(time, value));
@@ -75,7 +77,8 @@ void MainWindow::slot_returnHRValue(double time, double value)
     m_hrSeries->append(QPointF(time, value));
 }
 
-QChart *MainWindow::createPPGChart()
+// FUNC: create ppg chart
+QChart *ppgViewer::createPPGChart()
 {
     // qDebug() << "in createPPGChart";
     QChart *chart = new QChart();
@@ -92,7 +95,8 @@ QChart *MainWindow::createPPGChart()
     return chart;
 }
 
-QChart* MainWindow::createHRChart()
+// FUNC: create heart rate chart
+QChart* ppgViewer::createHRChart()
 {
     // Debug() << "in createPPGChart";
     QChart *chart = new QChart();
@@ -109,7 +113,8 @@ QChart* MainWindow::createHRChart()
     return chart;
 }
 
-void MainWindow::createCharts()
+// FUNC: initialize
+void ppgViewer::initialize()
 {
     // qDebug() << "in create charts ";
     m_ppgChartView = new QChartView(createPPGChart());
@@ -118,36 +123,40 @@ void MainWindow::createCharts()
     ui->horizontalLayout->addWidget(m_hrChartView, 1);//add hr chart to window
 }
 
-void MainWindow::on_pushButton_start_clicked()
+// 
+void ppgViewer::on_pushButton_start_clicked()
 {
-    if(m_isPlaying) //if is playing , stop it.
-    {
+    // if is playing , stop it.
+    if(m_isPlaying){
         m_isPlaying = false;
         ui->pushButton_start->setText("start");
-        emit signal_setPlayingState(true);
-        // m_controller->quit();
+        emit signal_setPlayingState(m_isPlaying);
     }
-    else //if is not playing, start it.
-    {
+    // if is not playing, start it.
+    else{
         m_isPlaying = true;
         ui->pushButton_start->setText("stop");
-        emit signal_setPlayingState(false);
+        emit signal_setPlayingState(m_isPlaying);
         m_controller->start();
     }
+    
 }
 
 //change video mode when clicked
-void MainWindow::on_pushButton_videoMode_clicked()
+void ppgViewer::on_pushButton_videoMode_clicked()
 {
-    if(m_videoMode == 1)
-    {
-        m_videoMode = 2;
+    if(m_videoMode == VIDEO_MODE_CAMERA){
+        m_videoMode = VIDEO_MODE_FILE;
         ui->pushButton_videoMode->setText("File");
         emit signal_setVideoMode(m_videoMode);
+
+        QString videoPath = QFileDialog::getOpenFileName(this, tr("选择需要解析的视频"),
+                            QDir::homePath(), tr("Multimedia files(*)"));
+        if (videoPath.isEmpty()) return;
+        else emit signal_setVideoPath(videoPath);
     }
-    else if(m_videoMode == 2)
-    {
-        m_videoMode = 1;
+    else if(m_videoMode == VIDEO_MODE_FILE){
+        m_videoMode = VIDEO_MODE_CAMERA;
         ui->pushButton_videoMode->setText("Camera");
         emit signal_setVideoMode(m_videoMode);
     }

@@ -7,11 +7,14 @@
 #include "ppgDetector.h"
 #include "ppgFilter.h"
 
+#define VIDEO_MODE_CAMERA 0
+#define VIDEO_MODE_FILE   1
+
 class Controller : public QThread
 {
     Q_OBJECT
 public:
-    Controller();
+    Controller(QString videoPath);
     double getFps();
     double getCalcTime();
 signals:
@@ -20,6 +23,7 @@ signals:
     void signal_returnHRValue(double time, double value);
 public slots:
     void slot_setVideoMode(int mode);
+    void slot_setVideoPath(QString newVideoPath);
     void slot_setPlayingState(bool state);
 protected:
     void run(); // when DetectThread.start() called, run function "run()".
@@ -28,6 +32,7 @@ private:
     bool m_exitState;
     double m_time;
     double m_fps;
+    QString m_videoPath;
 };
 
 #endif // __CONTROLLER__

@@ -62,7 +62,6 @@ add_subdirectory(dep/dlib dlib_build)
 
 # DEPENDENCY: qt
 find_package(Qt5 5.2.0 REQUIRED COMPONENTS Quick Core Charts Widgets)
-find_package(VLCQt REQUIRED COMPONENTS Core Widgets)
 # Set Qt bin dir to find QtCore*.dll and other libs to install
 string(REGEX REPLACE "([^ ]+)[/\\].*" "\\1" QT_BIN_DIR_TMP "${QT_MOC_EXECUTABLE}")
 string(REGEX REPLACE "\\\\" "/" QT_BIN_DIR "${QT_BIN_DIR_TMP}")
@@ -105,7 +104,10 @@ set(UI
     ${CMAKE_SRC_PATH}/ppgViewer.ui)
 set(SRC
     ${CMAKE_SRC_PATH}/main.cpp
-    ${CMAKE_SRC_PATH}/ppgViewer.cpp)
+    ${CMAKE_SRC_PATH}/ppgViewer.cpp
+    ${CMAKE_SRC_PATH}/ppgFilter.cpp
+    ${CMAKE_SRC_PATH}/ppgDetector.cpp
+    ${CMAKE_SRC_PATH}/ppgController.cpp)
 
 # BUILD: for dlib dependent source file
 macro(add_dlib name)
@@ -133,7 +135,6 @@ macro(add_main name)
         dlib::dlib
         ${OpenCV_LIBS}
         Qt5::Core Qt5::Charts Qt5::Widgets
-        VLCQt::Core VLCQt::Widgets
     )
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         add_custom_command(TARGET ${name} 
@@ -182,8 +183,7 @@ macro(add_app name)
     target_link_libraries(${PROJECT_NAME}
         -lgfortran
         dlib::dlib
-        ${OpenCV_LIBS}
-        VLCQt::Core VLCQt::Widgets)
+        ${OpenCV_LIBS})
     install(
         TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${PROJECT_INSTALL_BIN_DIR}
@@ -200,7 +200,7 @@ endmacro()
 # add_sigpack(ppgFilter)
 
 # EXEC: main
-# add_main(ppgViewer)
+add_main(ppgViewer)
 
 # EXEC: app
-add_app(ppgViewer)
+# add_app(ppgViewer)

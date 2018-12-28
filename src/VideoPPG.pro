@@ -33,15 +33,14 @@ LIBS += -L/usr/local/lib -ldlib -lcblas -llapack -lpthread \
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp \
-    /home/my/software/dlib-master/dlib/all/source.cpp \
+    ppgViewer.cpp \
     ppgFilter.cpp \
     ppgDetector.cpp \
     ppgController.cpp
 
 HEADERS += \
-    mainwindow.h \
     utils.h \
+    ppgViewer.h \
     ppgFilter.h \
     ppgDetector.h \
     ppgController.h
