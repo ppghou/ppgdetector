@@ -12,46 +12,61 @@
 #include <opencv/highgui.h>
 #include <chrono>
 #include <algorithm>
-#include "Filter.h"
+#include <cmath>
+#include "ppgFilter.h"
 #include "utils.hpp"
+
+#define min(a,b) ((a)>(b) ? b:a)
+#define max(a,b) ((a)<(b) ? b:a)
 
 using namespace dlib;
 using namespace cv;
 using namespace std;
 using namespace chrono;
 
-template<int N, int N_tot>
-Rect np_to_rect(int(&rank)[N], double(&marks_x)[N_tot], \
-	double(&marks_y)[N_tot], double ratio);
-
-void myResize(Mat& image, Mat& resized, Size& new_size, int width);
-
-Mat clip(Mat& image, Size& size, dlib::rectangle rect);
-
 class Detector{
 private:
+	int detectWidth;
 	double roiRatio;
-	double smoothRatio;
+	double rectSmoothRatio;
+	double rectDistThres;
+	double markSmoothRatio;
+	double markDistThres1;
+	double markDistThres2;
 
 	// Detection parameters
 	frontal_face_detector detector;
 	shape_predictor predictor;
+	std::vector<std::vector<int>> idx;
 
 	// Detection results of last frame
 	dlib::rectangle rect;
-	double marks_x[68];
-	double marks_y[68];
-
-	// Pointer to a Filter instance
-	Filter* filter;
+	std::vector<double> xMarks, yMarks;
+	Mat detectedImg;
 
 public:
-	Detector(Filter* f);
+	Detector();
 
 	void initialize();
 
 	Scalar detect(Mat& image);
 
-	double dist(dlib::rectangle rect1, dlib::rectangle rect2);
+	double distForRects(dlib::rectangle rect1, dlib::rectangle rect2);
+	
+	void smoothRects(dlib::rectangle &rect1, dlib::rectangle &rect2, double smoothRatio);
+
+	double distForMarks(dlib::rectangle rect1, dlib::rectangle rect2);
+
+	void smoothMarks(std::vector<double> &xMarks1, std::vector<double> &yMarks1, \
+		std::vector<double> &xMarks2, std::vector<double> &yMarks2, double smoothRatio);
+
+	Rect Detector::npToRect(std::vector<int> &rank, std::vector<double> xMarks, \
+		std::vector<double> yMarks, double ratio);
+
+	void myResize(Mat& image, Mat& resized, Size& new_size, int width);
+
+	dlib::rectangle coordTrans(Size imshape, Size oriSize, dlib::rectangle rect);
+
+	Mat getImg();
 };
 #endif
