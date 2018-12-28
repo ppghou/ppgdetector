@@ -4,6 +4,7 @@
 #include <iostream>
 #include <math.h>
 #include <random>
+#include "ppgFilter.h"
 
 using namespace std;
 
@@ -11,64 +12,27 @@ using namespace std;
 #define videofre 50
 #define signallength 10
 
-vector<int> findPeaks(vector<float> num, int count)
-{
-	vector<int> sign;
-	for (int i = 1; i < count; i++)
-	{
-		float diff = num[i] - num[i - 1];
-		sign.push_back(diff>0 ? 1 : (diff<0 ? -1 : 0));
-	}
-	vector<int> indMax;
-	vector<int> indMin;
-
-	for (int j = 1; j < sign.size(); j++)
-	{
-		if (sign[j] == 0) {
-			if (sign[j - 1] > 0, sign[j + 1] < 0)
-			{
-				indMax.push_back(j);
-				j++;
-			}
-			else if (sign[j - 1] < 0, sign[j + 1] > 0)
-			{
-				indMin.push_back(j);
-				j++;
-			}
-			else
-			{
-				j++;
-			}
-			continue;
-		}
-		int diff = sign[j] - sign[j - 1];
-		if (diff < 0)
-			indMax.push_back(j);
-		else if (diff > 0)
-			indMin.push_back(j);
-	}
-	return indMax;
-}
-
-vector<float> signalGenerator(float fre)
+arma::vec signalGenerator(float fre)
 {
 	vector<float> signal;
+	arma::vec transSignal(videofre*signallength, arma::fill::zeros);
 	for (int i = 0; i < videofre*signallength; i++)
 	{
-		signal.push_back(sin(2 * PI * fre *i / videofre));
-		//cout << signal[i] << endl;
+		transSignal[i] = (sin(2 * PI * fre *i / videofre));
 	}
-	return signal;
+	
+	return transSignal;
 }
 
-bool findPeaks_Test(vector<float> signal, int count, float fre)
+bool findPeaks_Test(arma::vec signal, int count, float fre)
 {
-	vector<int> indMax(findPeaks(signal, count));
+	Filter *testFilter = new Filter(videofre*signallength);
+
+	vector<int> indMax(testFilter->findPeaks(signal, count));
 	vector<int> signal_period;
 	for (int i = 1; i < indMax.size(); i++)
 	{
 		signal_period.push_back(indMax[i] - indMax[i - 1]);
-		cout << indMax[i] - indMax[i - 1] << endl;
 	}
 	bool result = true;
 	for (int j = 1; j < signal_period.size(); j++)
@@ -85,17 +49,72 @@ bool findPeaks_Test(vector<float> signal, int count, float fre)
 int main()
 {
 	float fre;
+	int pass = 0;
+	int fail = 0;
+	int total = 1000;
 	std::default_random_engine e;
 	e.seed(time(0));
 	uniform_real_distribution<float> u(1, 2);
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < total; i++)
 	{
 		fre = u(e);
-		cout << fre << endl;
-		vector<float> testSignal(signalGenerator(1));
-		bool test = findPeaks_Test(testSignal, videofre*signallength, 1);
-		std::cout << test << endl;
+
+		arma::vec testSignal(signalGenerator(fre));
+		bool test = findPeaks_Test(testSignal, videofre*signallength, fre);
+		if (test == 1) {
+			cout << "Test " << i+1 << " pass!" << endl;
+			pass++;
+		}
+		else {
+			cout << "Test " << i + 1 << " fail!" << endl;
+			fail++;
+		}
 	}
+
+	cout << endl << "Special Test1:";
+	arma::vec specialSignal(videofre*signallength, arma::fill::ones);
+
+	bool test1 = findPeaks_Test(specialSignal, videofre*signallength, 0);
+	if (test1 == 1) {
+		cout << " pass!" << endl;
+		pass++;
+	}
+	else {
+		cout << " fail!" << endl;
+		fail++;
+	}
+
+	for (int i = videofre * signallength / 2; i < videofre*signallength; i++) {
+		specialSignal[i] += i;
+	}
+	cout << "Special Test2:";
+	bool test2 = findPeaks_Test(specialSignal, videofre*signallength, 0);
+	if (test2 == 1) {
+		cout << " pass!" << endl;
+		pass++;
+	}
+	else {
+		cout << " fail!" << endl;
+		fail++;
+	}
+
+	for (int i = 0; i < videofre*signallength/2; i++) {
+		specialSignal[i] += videofre*signallength/2-i;
+	}
+	cout << "Special Test3:";
+	bool test3 = findPeaks_Test(specialSignal, videofre*signallength, 0);
+	if (test3 == 1) {
+		cout << " pass!" << endl;
+		pass++;
+	}
+	else {
+		cout << " fail!" << endl;
+		fail++;
+	}
+	
+	cout << "----------" << endl;
+	cout << "Total: " << pass << "/" << total+3 << " passed!" << endl;
+	
 	system("pause");
 	return 0;
 }

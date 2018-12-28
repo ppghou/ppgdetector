@@ -7,12 +7,20 @@ import matplotlib.pyplot as plt
 import sys
 
 # http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
+<<<<<<< HEAD
 predictorPath = r"../../dep/shape_predictor_68_face_landmarks.dat"
 predictorIdx = [[1, 3, 31], [13, 15, 35]]
 #videoPath = r"E:\Undergraduate\10_大四秋\软件工程 董渊\软件工程课大作业\数据\20181109_近距离_头部不固定\视频数据\PIC_0427.MP4"
 videoPath = r"../../data/video/PIC_0401.MP4"
 file = open(r'output_detect.txt', 'w')
 startTime = 12 # Start the analysis from startTime
+=======
+predictorPath = r"shape_predictor_68_face_landmarks.dat"
+predictorIdx = [[1, 3, 31], [13, 15, 35]]
+#videoPath = r"video.MP4"
+file = open(r'output_detect.txt', 'w')
+startTime = 0 # Start the analysis from startTime
+>>>>>>> 8d65bf9dd02952114a8c4a1e39aed0ab305d258a
 cv2.destroyAllWindows()
 plt.close('all')
 
@@ -86,10 +94,17 @@ def coordTrans(imShape, oriSize, rect):
     Returns:
         the rect in the original image
     """
+<<<<<<< HEAD
     left = int(rect.left() / oriSize[0] * imShape[1])
     right = int(rect.right() / oriSize[0] * imShape[1])
     top = int(rect.top() / oriSize[1] * imShape[0])
     bottom = int(rect.bottom() / oriSize[1] * imShape[0])
+=======
+    left = int(round(rect.left() / oriSize[0] * imShape[1]))
+    right = int(round(rect.right() / oriSize[0] * imShape[1]))
+    top = int(round(rect.top() / oriSize[1] * imShape[0]))
+    bottom = int(round(rect.bottom() / oriSize[1] * imShape[0]))
+>>>>>>> 8d65bf9dd02952114a8c4a1e39aed0ab305d258a
     return dlib.rectangle(left, top, right, bottom)
     
 class Detector:
@@ -104,7 +119,12 @@ class Detector:
     rectSmoothRatio = 0.98
     rectDistThres = 4
     markSmoothRatio = 0.95
+<<<<<<< HEAD
     markDistThres = 0.2
+=======
+    markDistThres1 = 0.02
+    markDistThres2 = 0.025
+>>>>>>> 8d65bf9dd02952114a8c4a1e39aed0ab305d258a
     
     def __init__(self, detectorPath = None, predictorPath = None, predictorIdx = None):
         """ Initialize the instance of Detector
@@ -156,6 +176,7 @@ class Detector:
         # If not the first image, perform face region smoothing
         if (self.rect!= None):
             dist = self.distForRects(self.rect, rect)
+<<<<<<< HEAD
             smoothRatio = self.rectSmoothRatio *  \
                         math.sqrt(1 - dist / self.rectDistThres)
             print("%.3f"%(dist), end="", file = file)
@@ -165,6 +186,14 @@ class Detector:
                 rect = self.smoothRects(self.rect, rect, smoothRatio)
         print(rect)
         print("\t", end="", file = file)
+=======
+            print("%.3f"%(dist))
+            if (dist < self.rectDistThres):
+                smoothRatio = self.rectSmoothRatio *  \
+                            math.sqrt(1 - dist / self.rectDistThres)
+                rect = self.smoothRects(self.rect, rect, smoothRatio)
+                print("%.3f"%(smoothRatio))
+>>>>>>> 8d65bf9dd02952114a8c4a1e39aed0ab305d258a
         
         # Perform landmark prediction on the face region
         face = coordTrans(image.shape, detectionSize, rect)
@@ -174,11 +203,25 @@ class Detector:
         # If not the first image, perform landmark smoothing
         if (self.rect != None):
             dist = self.distForMarks(self.rect, rect)
+<<<<<<< HEAD
             print("%.3f"%(dist), end="", file = file)
             if (dist < self.markDistThres):
                 landmarks = self.smoothMarks(self.landmarks,
                                              landmarks, self.markSmoothRatio)
         print("\t", end="", file = file)
+=======
+            print("%.3f"%(dist))
+            if (dist < self.markDistThres2):
+                tmp = dist - self.markDistThres1
+                smoothRatio = self.markSmoothRatio + 0.5 * (np.sign(tmp) + 1) \
+                            * (math.exp(-1e3 * tmp) - self.markSmoothRatio)
+                if dist > self.markDistThres1:
+                    smoothRatio = math.exp(1e3 * (self.markDistThres1 - dist))
+                landmarks = self.smoothMarks(self.landmarks,
+                                             landmarks, smoothRatio)
+                print("%.3f"%(smoothRatio))
+            print("")
+>>>>>>> 8d65bf9dd02952114a8c4a1e39aed0ab305d258a
         
         # ROI value
         rois = [np_to_bb(landmarks[idx], self.roiRatio) for idx in self.idx]
@@ -189,12 +232,27 @@ class Detector:
         if '-s' in sys.argv:
             # Draw sample rectangles
             for roi in rois:
+<<<<<<< HEAD
                 cv2.rectangle(image, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
             # Draw feature points
             for (i, (x, y)) in enumerate(landmarks):
                 cv2.putText(image, "{}".format(i), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
             cv2.imshow("Face", resize(image[face.top():face.bottom(), 
                                         face.left():face.right()], self.detectSize)[0])
+=======
+                cv2.rectangle(image, (roi[0], roi[1]),
+                              (roi[2], roi[3]), (0, 0, 255), 2)
+            # Draw feature points
+            for (i, (x, y)) in enumerate(landmarks):
+                cv2.putText(image, "{}".format(i), (x, y), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            face = dlib.rectangle(max(face.left(), 0), max(face.top(), 0),
+                                      min(face.right(), image.shape[1]),
+                                      min(face.bottom(), image.shape[0]))
+            image = resize(image[face.top():face.bottom(), 
+                                 face.left():face.right()], self.detectSize)[0]
+            cv2.imshow("Face", image)
+>>>>>>> 8d65bf9dd02952114a8c4a1e39aed0ab305d258a
                 
         self.rect = rect
         self.landmarks = landmarks
@@ -213,6 +271,7 @@ class Detector:
                    pow(disty / (rect1.bottom() - rect1.top()), 2), 1/2)
         
     def smoothRects(self, rect1, rect2, smoothRatio):
+<<<<<<< HEAD
         left = round(smoothRatio * rect1.left() + \
                     (1 - smoothRatio) * rect2.left())
         right = round(smoothRatio * rect1.right() + \
@@ -221,6 +280,16 @@ class Detector:
                     (1 - smoothRatio) * rect2.top())
         bottom = round(smoothRatio * rect1.bottom() + \
                     (1 - smoothRatio) * rect2.bottom())
+=======
+        left = int(round(smoothRatio * rect1.left() +
+                    (1 - smoothRatio) * rect2.left()))
+        right = int(round(smoothRatio * rect1.right() +
+                    (1 - smoothRatio) * rect2.right()))
+        top = int(round(smoothRatio * rect1.top() +
+                    (1 - smoothRatio) * rect2.top()))
+        bottom = int(round(smoothRatio * rect1.bottom() +
+                    (1 - smoothRatio) * rect2.bottom()))
+>>>>>>> 8d65bf9dd02952114a8c4a1e39aed0ab305d258a
         return dlib.rectangle(left, top, right, bottom)
     
     def distForMarks(self, rect1, rect2):
@@ -252,12 +321,17 @@ if __name__ == "__main__":
     times = []
     data = [[], [], []]
     video = cv2.VideoCapture(videoPath)
+#    video = cv2.VideoCapture(0)
     fps = video.get(cv2.CAP_PROP_FPS)
     video.set(cv2.CAP_PROP_POS_FRAMES, startTime * fps) 
     
     # Handle frame one by one
     t = 0.0
     ret, frame = video.read()
+<<<<<<< HEAD
+=======
+    print(ret)
+>>>>>>> 8d65bf9dd02952114a8c4a1e39aed0ab305d258a
     while(video.isOpened()):
         t += 1.0/fps
         calcTime = time.time()
