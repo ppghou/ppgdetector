@@ -1,4 +1,5 @@
-#include "Filter.h"
+#include "ppgFilter.h"
+#include "utils.h"
 
 void Filter::calc(){
 	arma::vec x(windowSize, arma::fill::zeros);  // Input sig
@@ -22,6 +23,7 @@ void Filter::calc(){
 	// Find peaks in y (spanned)
 	std::vector<double> peak;
 	std::vector<int> peakPos;
+
 	int pos = 0;
 	for (int i = 0; i < peakPosFilt.size(); ++i) {
 		int posFilt = peakPosFilt[i] - groupDelay2;
@@ -86,23 +88,40 @@ void Filter::calc(){
 }
 
 std::vector<int> Filter::findPeaks(arma::vec num, int count){
-	std::vector<int> sign;
-	for (int i = 1; i < count; i++) {
-		double diff = num[i] - num[i - 1];
+	vector<int> sign;
+	for (int i = 1; i < count; i++)
+	{
+		float diff = num[i] - num[i - 1];
 		sign.push_back(diff > 0 ? 1 : (diff < 0 ? -1 : 0));
 	}
-	std::vector<int> indMax;
-	std::vector<int> indMin;
+	vector<int> indMax;
+	vector<int> indMin;
 
 	for (int j = 1; j < sign.size(); j++)
 	{
+		if (sign[j] == 0) {
+			if (sign[j - 1] > 0, sign[j + 1] < 0)
+			{
+				indMax.push_back(j);
+				j++;
+			}
+			else if (sign[j - 1] < 0, sign[j + 1] > 0)
+			{
+				indMin.push_back(j);
+				j++;
+			}
+			else
+			{
+				j++;
+			}
+			continue;
+		}
 		int diff = sign[j] - sign[j - 1];
 		if (diff < 0)
 			indMax.push_back(j);
 		else if (diff > 0)
 			indMin.push_back(j);
 	}
-
 	return indMax;
 }
 
@@ -113,29 +132,58 @@ void Filter::update(arma::vec y, std::vector<int> peakPosWin, std::vector<double
 	int start = signal.size() - (raw.size() - windowSize - groupDelay1);
 	for (int i = start; i < windowSize; ++i) {
 		signal.push_back(y[i]);
+
 		cout << y[i] << endl;
 	}
 
 	// Discard the last peakPos,
 	// Update all peaks after the second last one
-	popLast(peakPos);
-	popLast(peak);
-	for (int i = 0; i < peakPosWin.size(); ++i){
-		int pos = peakPosWin[i] + (raw.size() - windowSize);
-		if (peakPos.empty() || pos > peakPos.back()) {
-			peakPos.push_back(pos);
-			peak.push_back(peakWin[i]);
-		}
-	}
+//    popLast(peakPos);
+//    popLast(peak);
+    if(peakPos.size() != 0)
+    {
+       peakPos.pop_back();
+    }
+    if(peak.size() != 0)
+    {
+        peak.pop_back();
+    }
+    if(frequency.size() != 0)
+    {
+        frequency.pop_back();
+    }
+
+    for (int i = 0; i < peakPosWin.size(); ++i){
+        int pos = peakPosWin[i] + (raw.size() - windowSize);
+        if (peakPos.empty() || pos > peakPos.back()) {
+            double fre;
+            if(peakPos.empty())
+                fre = 0;
+            else
+            {
+                fre = 60 * fs / (pos - peakPos.back());
+                if(fre >120)
+                    continue;
+            }
+            frequency.push_back(fre);
+            peakPos.push_back(pos);
+            peak.push_back(peakWin[i]);
+        }
+    }
 
 	// Save signal and peakpos for output
-	for (int i = rankSigOut; i < peakPos[peakPos.size() - 2]; ++i)
+    for (int i = rankSigOut + 1; i < peakPos[peakPos.size() - 2]; ++i)
 		signalTmp.push_back(signal[i]);
 	rankSigOut = peakPos[peakPos.size() - 2];
 
-	for (int i = rankPeakPosOut; i < peakPos.size() - 1; ++i)
+    for (int i = rankPeakPosOut + 1; i < peakPos.size() - 1; ++i)
 		peakPosTmp.push_back(peakPos[i]);
 	rankPeakPosOut = peakPos.size() - 1;
+
+    for (int i = frequencyPosOut + 1; i < frequency.size() - 1; ++i)
+        frequencyTmp.push_back(frequency[i]);
+    frequencyPosOut = frequency.size() - 1;
+
 
 	outputFlag = true;
 }
@@ -152,6 +200,7 @@ void Filter::initialize(double samplingFrequency){
 	outputFlag = false;
 	rankSigOut = -1;
 	rankPeakPosOut = -1;
+    frequencyPosOut = -1;
 
 	fs = samplingFrequency;
 
@@ -188,7 +237,7 @@ void Filter::filterInput(double data){
 }
 
 bool Filter::getFlag() {
-	return outputFlag;
+    return outputFlag;
 }
 
 std::vector<double> Filter::getSignal(){
@@ -196,12 +245,25 @@ std::vector<double> Filter::getSignal(){
 }
 
 std::vector<int> Filter::getPeakPos(){
+    for(int i = 0; i < peakPosTmp.size(); ++i)
+    {
+        cout << "getPeakPos" << peakPosTmp[i] << endl;
+    }
 	return peakPosTmp;
+}
+
+std::vector<double> Filter::getFrequency(){
+    for(int i = 0; i < frequencyTmp.size(); ++i)
+    {
+        cout << "getFrequency" << frequencyTmp[i] << endl;
+    }
+    return frequencyTmp;
 }
 
 void Filter::clearTmpData(){
 	clearVector(signalTmp);
 	clearVector(peakPosTmp);
+    clearVector(frequencyTmp);
 	outputFlag = false;
 	return;
 }
