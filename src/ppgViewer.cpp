@@ -68,13 +68,13 @@ void ppgViewer::slot_returnHRValue(double time, double value)
 {
     QVector<QPointF> data = m_hrSeries->pointsVector();
     data.append(QPointF(time, value));
-
+    m_hrSeries->append(QPointF(time, value));
     m_hrChartView->chart()->axisY()->setRange(50, 120);
+
     if(time<m_hrTimeSpan)
         m_hrChartView->chart()->axisX()->setRange(0, m_hrTimeSpan);
     else
         m_hrChartView->chart()->axisX()->setRange(time-m_hrTimeSpan, time);
-    m_hrSeries->append(QPointF(time, value));
 }
 
 // FUNC: create ppg chart
@@ -138,8 +138,7 @@ void ppgViewer::on_pushButton_start_clicked()
         ui->pushButton_start->setText("stop");
         emit signal_setPlayingState(m_isPlaying);
         m_controller->start();
-    }
-    
+    }   
 }
 
 //change video mode when clicked

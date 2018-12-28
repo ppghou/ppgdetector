@@ -69,7 +69,8 @@ string(REGEX REPLACE "bin" "lib" QT_LIB_DIR "${QT_BIN_DIR}")
 
 # DEPENDENCY: sigpack
 include_directories(
-    ${CMAKE_SOURCE_DIR}/dep/sigpack)
+    ${CMAKE_SOURCE_DIR}/dep/sigpack
+    ${CMAKE_SRC_PATH})
 
 # = = = = = = = = = = = = = = = = = = = = = = = = 
 # INSTALL PREPARATION
@@ -107,7 +108,8 @@ set(SRC
     ${CMAKE_SRC_PATH}/ppgViewer.cpp
     ${CMAKE_SRC_PATH}/ppgFilter.cpp
     ${CMAKE_SRC_PATH}/ppgDetector.cpp
-    ${CMAKE_SRC_PATH}/ppgController.cpp)
+    ${CMAKE_SRC_PATH}/ppgController.cpp
+)
 
 # BUILD: for dlib dependent source file
 macro(add_dlib name)
@@ -119,6 +121,14 @@ endmacro()
 # g++ -Wall -std=c++11 -Dunix -DHAVE_FFTW -I../sigpack -larmadillo -lfftw3
 macro(add_sigpack name)
    add_executable(${name} ${CMAKE_SRC_PATH}/${name}.cpp)
+endmacro()
+
+macro(add_test name)
+    add_executable(${name}
+        ${CMAKE_SRC_PATH}/test/${name}.cpp
+        ${CMAKE_SRC_PATH}/ppgFilter.cpp
+        ${CMAKE_SRC_PATH}/ppgDetector.cpp)
+    target_link_libraries(${name} dlib::dlib ${OpenCV_LIBS} -lgfortran)
 endmacro()
 
 # BUILD: main interface and all dependent files
@@ -198,6 +208,10 @@ endmacro()
 # EXEC: test
 # add_dlib(ppgDetector)
 # add_sigpack(ppgFilter)
+add_test(findpeakTest)
+add_test(bandpassTest)
+add_test(DetectorBlackBox)
+add_test(DetectorWhiteBoxTest)
 
 # EXEC: main
 add_main(ppgViewer)

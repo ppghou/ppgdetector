@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <cmath>
 #include "ppgFilter.h"
-#include "utils.hpp"
+#include "utils.h"
 
 #define min(a,b) ((a)>(b) ? b:a)
 #define max(a,b) ((a)<(b) ? b:a)

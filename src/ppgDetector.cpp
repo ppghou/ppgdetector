@@ -2,7 +2,7 @@
 
 Detector::Detector() {
 	detector = get_frontal_face_detector();
-	deserialize("../data/shape_predictor_68_face_landmarks.dat") >> predictor;
+	deserialize("../dep/shape_predictor_68_face_landmarks.dat") >> predictor;
 	initialize();
 }
 

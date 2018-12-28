@@ -12,7 +12,7 @@ int test(int &detailsCounts, vector<int> &max, vector<int> &T, int &tempT);
 int main() {
 	vector<float> time;
 	vector<float> data;
-	loadCSV("data_1031_0399_tRGB.csv", time, data);
+	loadCSV("../data/data_1031_0399_tRGB.csv", time, data);
 	int N = 500; // Number of samples
 	int Fs = 50; // sample frequency
 	vector<int> max;
