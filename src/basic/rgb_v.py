@@ -65,13 +65,12 @@ def detect(image):
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
         # left ROI
-        bb = np_to_bb([shape[2], shape[4], shape[31]])
-        print(bb)
+        bb = [int(b) for b in np_to_bb([shape[2], shape[4], shape[31]])]
         cv2.rectangle(image, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
         val1 = np.mean(np.mean(gray[bb[1]:bb[3],bb[0]:bb[2]]))
 
         # right ROI
-        bb = np_to_bb([shape[12], shape[14], shape[35]])
+        bb = [int(b) for b in np_to_bb([shape[12], shape[14], shape[35]])]
         cv2.rectangle(image, (bb[0], bb[1]), (bb[2], bb[3]), (0, 0, 255), 2)
         val2 = np.mean(np.mean(gray[bb[1]:bb[3],bb[0]:bb[2]]))
         
@@ -86,7 +85,7 @@ def detect(image):
 if __name__ == "__main__":
     # preparation
     data = []
-    video = cv2.VideoCapture("../../data/video/in.mov")
+    video = cv2.VideoCapture("../../data/video/PIC_0427.MP4")
     fps = video.get(cv2.CAP_PROP_FPS)
 
     # handle frame one by one
@@ -104,7 +103,7 @@ if __name__ == "__main__":
 
         # check stop or quit
         ret,frame = video.read()
-        if cv2.waitKey(0) & 0xFF == ord('q') or not ret:
+        if cv2.waitKey(1) & 0xFF == ord('q') or not ret:
             break
 
     import matplotlib.pyplot as plt
