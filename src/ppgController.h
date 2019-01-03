@@ -25,6 +25,7 @@ public slots:
     void slot_setVideoMode(int mode);
     void slot_setVideoPath(QString newVideoPath);
     void slot_setPlayingState(bool state);
+    void slot_saveData(QString saveDataPath);
 protected:
     void run(); // when DetectThread.start() called, run function "run()".
 private:
@@ -32,6 +33,8 @@ private:
     bool m_exitState;
     double m_time;
     double m_fps;
+    std::vector<double> m_ppgTime;
+    std::vector<double> m_ppgValue;
     QString m_videoPath;
 };
 

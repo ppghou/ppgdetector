@@ -12,8 +12,17 @@ void Controller::run()
 {
     VideoCapture video;
     Detector detector;
+    Mat frame;
+    system_clock::time_point ctime;
+    duration<double> time_span;
 
     while(1){
+        while(!m_exitState) waitKey(100);
+
+        // reset variables
+        clearVector(m_ppgTime);
+        clearVector(m_ppgValue);
+
         // Camera mode
         if(m_playMode == VIDEO_MODE_CAMERA){
             video = VideoCapture(0);
@@ -27,11 +36,7 @@ void Controller::run()
         // Handle frame one by one
         m_time = 0;
         int cnt = 0;
-        Mat frame;
-        system_clock::time_point ctime;
-        duration<double> time_span;
-
-        while(video.read(frame) && m_exitState){
+        while(m_exitState && video.read(frame)){
             cnt++;
             ctime = system_clock::now();
 
@@ -60,12 +65,14 @@ void Controller::run()
             printf("%.2f\t%.3f\t%.3f\t%.3f\t%.1f\t%.2f\n", m_time, value[0], value[1],
                     value[2], m_fps, 1 / time_span.count());
             m_time += 1 / m_fps;
+
+            m_ppgTime.push_back(m_time);
+            m_ppgValue.push_back(255-value.val[1]);
         }
-        waitKey(100);
+        video.release();
     }
 
     detector.initialize();
-    video.release();
     fclose(stdout);
 }
 
@@ -88,6 +95,18 @@ void Controller::slot_setVideoMode(int mode)
 {
     printf("slot_setVideoMode\n"); /* DevSkim: ignore DS154189 */
     m_playMode = mode;
+}
+
+// SLOT: set video mode
+void Controller::slot_saveData(QString saveDataPath)
+{
+    printf("slot_saveData\n"); /* DevSkim: ignore DS154189 */
+    FILE* fpt = fopen(saveDataPath.toStdString().c_str(),"w"); /* DevSkim: ignore DS154189 */
+    for(int i=0; i<m_ppgValue.size(); i++){
+        fprintf(fpt,"%10.4f,", m_ppgTime[i]);  /* DevSkim: ignore DS154189 */
+        fprintf(fpt,"%10.4f\n",m_ppgValue[i]); /* DevSkim: ignore DS154189 */
+    }
+    fclose(fpt);
 }
 
 // FUNC: get fps

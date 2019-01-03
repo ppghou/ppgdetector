@@ -18,10 +18,13 @@ ppgViewer::ppgViewer(QWidget *parent): QMainWindow(parent), ui(new Ui::ppgViewer
                   SLOT(slot_setVideoMode(int)));
     connect(this, SIGNAL(signal_setVideoPath(QString)), m_controller,
                   SLOT(slot_setVideoPath(QString)));
+    connect(this, SIGNAL(signal_saveData(QString)), m_controller,
+                  SLOT(slot_saveData(QString)));
     m_videoMode = VIDEO_MODE_CAMERA;
     m_ppgTimeSpan = 10;
     m_hrTimeSpan = 30;
     m_isPlaying = false;
+    m_initState = true;
 }
 
 ppgViewer::~ppgViewer()
@@ -32,9 +35,11 @@ ppgViewer::~ppgViewer()
 // SLOT: show frame in window
 void ppgViewer::slot_showImage(QImage img)
 {
-    ui->label->clear();
-    ui->label->setScaledContents(true);
-    ui->label->setPixmap(QPixmap::fromImage(img));
+    if(m_isPlaying){
+        ui->label->clear();
+        ui->label->setScaledContents(true);
+        ui->label->setPixmap(QPixmap::fromImage(img));
+    }
 }
 
 //SLOT: get a new PPG data, refresh the ppg chart
@@ -117,33 +122,47 @@ QChart* ppgViewer::createHRChart()
 void ppgViewer::initialize()
 {
     // qDebug() << "in create charts ";
-    m_ppgChartView = new QChartView(createPPGChart());
-    m_hrChartView = new QChartView(createHRChart());
-    ui->horizontalLayout->addWidget(m_ppgChartView, 0);//add ppg chart to window
-    ui->horizontalLayout->addWidget(m_hrChartView, 1);//add hr chart to window
+    ui->ppgChartView->setChart(createPPGChart());//add ppg chart to window
+    ui->hrChartView->setChart(createHRChart());//add hr chart to window
+    m_ppgChartView = ui->ppgChartView;
+    m_hrChartView = ui->hrChartView;
+    m_controller->start();
 }
 
-// 
+// FUNC: pushButton_start slot, handle start
+void ppgViewer::on_pushButton_save_clicked()
+{
+    if(m_isPlaying) on_pushButton_start_clicked();
+    if(!m_initState){
+        QString saveDataPath = QFileDialog::getOpenFileName(this, tr("输入需要保存的文件名"),
+                            QDir::homePath(), tr("*.csv"));
+        if (!saveDataPath.isEmpty())
+            emit signal_saveData(saveDataPath);
+    }
+    
+}
+
+// FUNC: pushButton_start slot, handle start
 void ppgViewer::on_pushButton_start_clicked()
 {
     // if is playing , stop it.
     if(m_isPlaying){
         m_isPlaying = false;
-        ui->pushButton_start->setText("start");
+        ui->pushButton_start->setText("Start");
         emit signal_setPlayingState(m_isPlaying);
     }
     // if is not playing, start it.
     else{
         m_isPlaying = true;
-        ui->pushButton_start->setText("stop");
+        ui->pushButton_start->setText("Stop");
         emit signal_setPlayingState(m_isPlaying);
         m_ppgSeries->clear();
         m_hrSeries->clear();
-        m_controller->start();
+        m_initState = false;
     }
 }
 
-//change video mode when clicked
+// FUNC: pushButton_videoMode slot, change video mode when clicked
 void ppgViewer::on_pushButton_videoMode_clicked()
 {
     if(!m_isPlaying){

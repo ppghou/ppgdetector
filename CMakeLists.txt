@@ -208,10 +208,11 @@ endmacro()
 # EXEC: test
 # add_dlib(ppgDetector)
 # add_sigpack(ppgFilter)
-add_test(findpeakTest)
-add_test(bandpassTest)
-add_test(DetectorBlackBox)
-add_test(DetectorWhiteBoxTest)
+
+# add_test(findpeakTest)
+# add_test(bandpassTest)
+# add_test(DetectorBlackBox)
+# add_test(DetectorWhiteBoxTest)
 
 # EXEC: main
 add_main(ppgViewer)

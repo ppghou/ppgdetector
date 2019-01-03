@@ -33,12 +33,14 @@ private slots:
     void slot_showImage(QImage img);
     void slot_returnPPGValue(double time, double value);
     void slot_returnHRValue(double time, double value);
+    void on_pushButton_save_clicked();
     void on_pushButton_start_clicked();
     void on_pushButton_videoMode_clicked();
 signals:
     void signal_setVideoMode(int mode);
     void signal_setVideoPath(QString newVideoPath);
     void signal_setPlayingState(bool state);
+    void signal_saveData(QString saveDataPath);
 private:
     Ui::ppgViewer *ui;
 
@@ -48,6 +50,7 @@ private:
     
     int m_videoMode;
     bool m_isPlaying;
+    bool m_initState;
     double m_fps;
     double m_ppgTimeSpan;
     double m_hrTimeSpan;
