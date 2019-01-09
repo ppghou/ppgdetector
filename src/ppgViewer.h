@@ -27,11 +27,12 @@ public:
     explicit ppgViewer(QWidget *parent = 0);
     ~ppgViewer();
     QLineSeries *m_ppgSeries;
+    QLineSeries *m_fltSeries;
     QLineSeries *m_hrSeries;
     void initialize();
 private slots:
     void slot_showImage(QImage img);
-    void slot_returnPPGValue(double time, double value);
+    void slot_returnPPGValue(double time, double value, int line);
     void slot_returnHRValue(double time, double value);
     void on_pushButton_save_clicked();
     void on_pushButton_start_clicked();

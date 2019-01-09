@@ -141,9 +141,9 @@ void Filter::update(arma::vec y, std::vector<int> peakPosWin, std::vector<double
     }
 
     // Save signal and peakpos for output
-    for (int i = rankSigOut; i < peakPos[peakPos.size() - 2]; ++i)
+    for (int i = rankSigOut; i < peakPos[peakPos.size() - 1]; ++i)
         signalTmp.push_back(signal[i]);
-    rankSigOut = peakPos[peakPos.size() - 2];
+    rankSigOut = peakPos[peakPos.size() - 1];
 
     for (int i = rankPeakPosOut; i < peakPos.size() - 1; ++i)
         peakPosTmp.push_back(peakPos[i]);

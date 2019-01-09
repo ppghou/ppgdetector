@@ -8,8 +8,8 @@ ppgViewer::ppgViewer(QWidget *parent): QMainWindow(parent), ui(new Ui::ppgViewer
     m_controller = new Controller(m_videoPath);
     connect(m_controller, SIGNAL(signal_showImage(QImage)), this,
                             SLOT(slot_showImage(QImage)));
-    connect(m_controller, SIGNAL(signal_returnPPGValue(double,double)), this,
-                            SLOT(slot_returnPPGValue(double,double)));
+    connect(m_controller, SIGNAL(signal_returnPPGValue(double,double,int)), this,
+                            SLOT(slot_returnPPGValue(double,double,int)));
     connect(m_controller, SIGNAL(signal_returnHRValue(double,double)), this,
                             SLOT(slot_returnHRValue(double,double)));
     connect(this, SIGNAL(signal_setPlayingState(bool)), m_controller,
@@ -43,29 +43,42 @@ void ppgViewer::slot_showImage(QImage img)
 }
 
 //SLOT: get a new PPG data, refresh the ppg chart
-void ppgViewer::slot_returnPPGValue(double time, double value)
+void ppgViewer::slot_returnPPGValue(double time, double value, int line)
 {
     // qDebug() << "in slot_returnPPGValue";
     // qDebug() << "value is " << value;
     m_fps = m_controller->getFps();
-    QVector<QPointF> data = m_ppgSeries->pointsVector();
-    data.append(QPointF(time, value));
-    m_ppgSeries->append(QPointF(time, value));
+    QVector<QPointF> data;
+    if(line==1){
+        data = m_fltSeries->pointsVector();
+        data.append(QPointF(time, value));
+        m_fltSeries->append(QPointF(time, value));
+    }else{
+        data = m_ppgSeries->pointsVector();
+        data.append(QPointF(time, value));
+        m_ppgSeries->append(QPointF(time, value));
+    
+        int beg = int(((time-m_ppgTimeSpan)>0?(time-m_ppgTimeSpan):0)*m_fps);
+        double max = data.at(beg).y();
+        double min = data.at(beg).y();
+        for(int i = beg+1;i < data.size()-1; ++i){
+            double val = data.at(i).y();
+            max = val > max ? val : max;
+            min = val < min ? val : min;
+        }
+        data = m_fltSeries->pointsVector();
+        for(int i = beg+1;i < data.size()-1; ++i){
+            double val = data.at(i).y();
+            max = val > max ? val : max;
+            min = val < min ? val : min;
+        }
+        m_ppgChartView->chart()->axisY()->setRange(min-1, max+1);
 
-    int beg = int(((time-m_ppgTimeSpan)>0?(time-m_ppgTimeSpan):0)*m_fps);
-    double max = data.at(beg).y();
-    double min = data.at(beg).y();
-    for(int i = beg+1;i < data.size()-1; ++i){
-        double val = data.at(i).y();
-        max = val > max ? val : max;
-        min = val < min ? val : min;
+        if(time<m_ppgTimeSpan)
+            m_ppgChartView->chart()->axisX()->setRange(0, m_ppgTimeSpan);
+        else
+            m_ppgChartView->chart()->axisX()->setRange(time-m_ppgTimeSpan, time);
     }
-    m_ppgChartView->chart()->axisY()->setRange(min-1, max+1);
-
-    if(time<m_ppgTimeSpan)
-        m_ppgChartView->chart()->axisX()->setRange(0, m_ppgTimeSpan);
-    else
-        m_ppgChartView->chart()->axisX()->setRange(time-m_ppgTimeSpan, time);
 }
 
 // SLOT: get a new heart rate data, refresh the hr chart
@@ -87,11 +100,12 @@ QChart *ppgViewer::createPPGChart()
 {
     // qDebug() << "in createPPGChart";
     QChart *chart = new QChart();
-    QString name("PPG ");
-
     m_ppgSeries = new QLineSeries(chart);
-    m_ppgSeries->setName(name);
+    m_ppgSeries->setName("PPG ");
+    m_fltSeries = new QLineSeries(chart);
+    m_fltSeries->setName("Flt ");
     chart->addSeries(m_ppgSeries);
+    chart->addSeries(m_fltSeries);
     chart->createDefaultAxes();
 
     // Add space to label to add space between labels and axis
@@ -105,10 +119,8 @@ QChart* ppgViewer::createHRChart()
 {
     // Debug() << "in createPPGChart";
     QChart *chart = new QChart();
-    QString name("HR ");
-
     m_hrSeries = new QLineSeries(chart);
-    m_hrSeries->setName(name);
+    m_hrSeries->setName("HR ");
     chart->addSeries(m_hrSeries);
     chart->createDefaultAxes();
 

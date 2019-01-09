@@ -51,11 +51,15 @@ void Controller::run()
 
             // Filter
             filter.filterInput(value.val[1]);
-            emit signal_returnPPGValue(m_time, 255-value.val[1]);
+            emit signal_returnPPGValue(m_time, 255-value.val[1], 0);
 
             std::vector<int> peak_pos = filter.getPeakPos();
             std::vector<double> hr_val = filter.getFrequency();
+            std::vector<double> signal = filter.getSignal();
             filter.clearTmpData();
+            for(int i = 0; i < signal.size(); i++){
+                emit signal_returnPPGValue(m_time-float(signal.size()-1-i+10)/m_fps, 255-signal[i], 1);
+            }
             for(int i = 0; i < hr_val.size(); i++){
                 emit signal_returnHRValue(double(peak_pos[i])/m_fps, hr_val[i]);
             }

@@ -19,7 +19,7 @@ public:
     double getCalcTime();
 signals:
     void signal_showImage(QImage img); // emit when read a new frame
-    void signal_returnPPGValue(double time, double value); // emit when caculated a frame
+    void signal_returnPPGValue(double time, double value, int line); // emit when caculated a frame
     void signal_returnHRValue(double time, double value);
 public slots:
     void slot_setVideoMode(int mode);
