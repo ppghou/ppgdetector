@@ -88,13 +88,16 @@ class Detector:
     """
     detectSize = 500
     clipSize = 540
-    roiRatio = 6
+    roiRatio = 10
     rectSmoothRatio = 0.98
     rectDistThres = 4
     markSmoothRatio = 0.95
     markDistThres1 = 0.02
     markDistThres2 = 0.025
-    
+    MMean = []
+    NHist = []
+    NStd = []
+
     def __init__(self, predictorPath = None, predictorIdx = None):
         """ Initialize the instance of Detector
         
@@ -172,14 +175,39 @@ class Detector:
         # Show detection results
         if '-m' in sys.argv:
             roi = rois[0]
-            Y = np.array(range(roi[1],roi[3]))
             X = np.array(range(roi[0],roi[2]))
+            Y = np.array(range(roi[1],roi[3]))
+            Z = image[roi[1]:roi[3], roi[0]:roi[2],1].astype('float64')
             X,Y = np.meshgrid(X,Y)
-            Z = ndimage.filters.gaussian_filter(image[roi[1]:roi[3], roi[0]:roi[2],1],sigma=5)
-            surf = ax.plot_surface(X, Y, Z,cmap=cm.hsv,vmin=70,vmax=110)
-            ax.set_zlim(60,120)
+
+            # Z = ndimage.filters.gaussian_filter(Z,sigma=5)
+            NX, NY = 10, 10
+            XS = [int(xs) for xs in np.linspace(0, roi[2]-roi[0], num=NX+1)]
+            YS = [int(ys) for ys in np.linspace(0, roi[3]-roi[1], num=NY+1)]
+            if not len(self.MMean):
+                self.MMean = np.zeros((NX,NY))
+                self.NHist = [[[] for j in range(NY)] for i in range(NX)]
+                self.NStd = np.zeros((NX,NY))
+                for i in range(NX):
+                    for j in range(NY):
+                        self.MMean[i,j] = np.mean(Z[YS[j]:YS[j+1],XS[i]:XS[i+1]])
+            for i in range(NX):
+                for j in range(NY):
+                    Z[YS[j]:YS[j+1],XS[i]:XS[i+1]] = Z[YS[j]:YS[j+1],XS[i]:XS[i+1]] - self.MMean[i,j]
+                    self.NHist[i][j].append(np.mean(Z[YS[j]:YS[j+1],XS[i]:XS[i+1]]))
+                    self.NStd[i,j] = np.std(self.NHist[i][j])
+                    a2.plot(self.NHist[i][j], '-C%d'%((i*NY+j)%9))
+            if(len(self.NHist[0][0])>100):
+                a2.set_xlim(len(self.NHist[0][0])-100,len(self.NHist[0][0]))
+
+            print(self.NStd)
+            surf = ax.plot_surface(X, Y, Z, cmap=cm.hsv,vmin=-10,vmax=10)
+            ax.set_zlim(-10,10)
             plt.draw()
             plt.pause(1e-17)
+            for i in range(NX):
+                for j in range(NY):
+                    a2.lines.pop(0)
             surf.remove()
 
         if '-s' in sys.argv:
@@ -305,8 +333,9 @@ if __name__ == "__main__":
         from mpl_toolkits.mplot3d import Axes3D
         from matplotlib import cm
         from matplotlib.ticker import LinearLocator, FormatStrFormatter
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')        
+        fig = plt.figure("3d face roi", figsize=(8,4))
+        ax = fig.add_subplot(121, projection='3d')
+        a2 = fig.add_subplot(122)
 
     # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
     # # Handle frame one by one
