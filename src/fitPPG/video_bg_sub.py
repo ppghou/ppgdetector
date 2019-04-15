@@ -1,7 +1,12 @@
+# 不同网格大小，量化敏感性：频域 低频信号集中程度
+# 统计敏感区域，反馈到原 roi
+# 
+
 import os,sys,time,math
 import cv2,dlib
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from utils import *
 
 def rect_to_bb(rect):
@@ -174,41 +179,52 @@ class Detector:
         
         # Show detection results
         if '-m' in sys.argv:
-            roi = rois[0]
+            roi = rois[1]
             X = np.array(range(roi[0],roi[2]))
             Y = np.array(range(roi[1],roi[3]))
+            F = image[roi[1]:roi[3], roi[0]:roi[2],:]
             Z = image[roi[1]:roi[3], roi[0]:roi[2],1].astype('float64')
             X,Y = np.meshgrid(X,Y)
 
-            # Z = ndimage.filters.gaussian_filter(Z,sigma=5)
-            NX, NY = 10, 10
-            XS = [int(xs) for xs in np.linspace(0, roi[2]-roi[0], num=NX+1)]
-            YS = [int(ys) for ys in np.linspace(0, roi[3]-roi[1], num=NY+1)]
+            # Z = ndimage.filters.gaussian_filter(Z,sigma=3)
+            NX, NY = 1, 1
+            CH = MplColorHelper('hsv', 0, NX*NY-1)
+            XS = [int(xs) for xs in np.linspace(0, roi[3]-roi[1], num=NX+1)]
+            YS = [int(ys) for ys in np.linspace(0, roi[2]-roi[0], num=NY+1)]
             if not len(self.MMean):
                 self.MMean = np.zeros((NX,NY))
                 self.NHist = [[[] for j in range(NY)] for i in range(NX)]
                 self.NStd = np.zeros((NX,NY))
                 for i in range(NX):
                     for j in range(NY):
-                        self.MMean[i,j] = np.mean(Z[YS[j]:YS[j+1],XS[i]:XS[i+1]])
+                        self.MMean[i,j] = np.mean(Z[XS[i]:XS[i+1],YS[j]:YS[j+1]])
+            
+            Z = Z - np.mean(self.MMean)
+            contour = ax.contourf(X, Y, Z, cmap=cm.hsv, vmin=-30, vmax=30,
+                        levels=MaxNLocator(nbins=20).tick_values(-30, 30))
+            length = len(self.NHist[0][0])+1
+            freq = 50
             for i in range(NX):
                 for j in range(NY):
-                    Z[YS[j]:YS[j+1],XS[i]:XS[i+1]] = Z[YS[j]:YS[j+1],XS[i]:XS[i+1]] - self.MMean[i,j]
-                    self.NHist[i][j].append(np.mean(Z[YS[j]:YS[j+1],XS[i]:XS[i+1]]))
+                    # Z[XS[i]:XS[i+1],YS[j]:YS[j+1]] = Z[XS[i]:XS[i+1],YS[j]:YS[j+1]] - self.MMean[i,j]
+                    self.NHist[i][j].append(np.mean(Z[XS[i]:XS[i+1],YS[j]:YS[j+1]]))
                     self.NStd[i,j] = np.std(self.NHist[i][j])
-                    a2.plot(self.NHist[i][j], '-C%d'%((i*NY+j)%9))
+                    color = np.array(CH.get_rgb(j+NY*i)[:3])
+                    a2.plot(np.arange(length)/freq, self.NHist[i][j], '-',color=color)
+                    cv2.putText(F, "%.1f"%self.NStd[i,j], (YS[j], XS[i]+30),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, np.flipud(color*255), 2)
+            cv2.imshow("Segment", F)
+            
             if(len(self.NHist[0][0])>100):
-                a2.set_xlim(len(self.NHist[0][0])-100,len(self.NHist[0][0]))
+                a2.set_xlim(length/freq-100/freq,length/freq)
 
-            print(self.NStd)
-            surf = ax.plot_surface(X, Y, Z, cmap=cm.hsv,vmin=-10,vmax=10)
-            ax.set_zlim(-10,10)
             plt.draw()
             plt.pause(1e-17)
             for i in range(NX):
                 for j in range(NY):
                     a2.lines.pop(0)
-            surf.remove()
+            for coll in contour.collections:
+                coll.remove()
 
         if '-s' in sys.argv:
             # Draw sample rectangles
@@ -216,7 +232,7 @@ class Detector:
                 cv2.rectangle(image, (roi[0], roi[1]),(roi[2], roi[3]), (0, 0, 255), 3)
             # Draw feature points
             for (i, (x, y)) in enumerate(landmarks):
-                cv2.putText(image, "{}".format(i), (x, y),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
+                cv2.putText(image, "{}".format(i), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
             face = dlib.rectangle(max(face.left(), 0), max(face.top(), 0), min(face.right(), image.shape[1]), min(face.bottom(), image.shape[0]))
             cv2.rectangle(image, (face.left(), face.top()), (face.right(),face.bottom()), (255, 0, 0), 3)
             # image = resize(image[face.top():face.bottom(), face.left():face.right()], self.detectSize)[0]
@@ -273,9 +289,10 @@ if __name__ == "__main__":
     predictorPath = r"../../dep/shape_predictor_68_face_landmarks.dat"
     predictorIdx = [[3, 31, 40], [13, 35, 47]]
     # videopath = r"../../data/video/ljn_ce_0047.mp4"
-    videopath = r"../../data/video/ljn_t1_1126.mp4"
+    # bx,by,bh,bw = 3200,180,256,256 # background rect start point and height and width
+    videopath = r"../../data/video/MVI_0401.MP4"
+    bx,by,bh,bw = 1200,180,256,256 # background rect start point and height and width
     saveFile = open(r'output_detect.txt', 'w')
-    bx,by,bh,bw = 3200,180,256,256 # background rect start point and height and width
     br = [bx,bx+bw,by,by+bh]    
     startTime = None
 
@@ -314,12 +331,14 @@ if __name__ == "__main__":
         cv2.namedWindow("Face", 0)
         cv2.namedWindow("bg", 0)
         cv2.namedWindow("bgSub", 0)
+        cv2.namedWindow("Segment", 0)
         cv2.resizeWindow("Face", 1280, 720)
         cv2.resizeWindow("bg", bw, bh)
         cv2.resizeWindow("bgSub", bw, bh)
         cv2.moveWindow("Face",0,0)
         cv2.moveWindow("bg",0,0)
         cv2.moveWindow("bgSub",bw,0)
+        cv2.moveWindow("Segment",bw+bw,0)
 
     if '-p' in sys.argv:
         plt.ion()
@@ -334,12 +353,11 @@ if __name__ == "__main__":
         from matplotlib import cm
         from matplotlib.ticker import LinearLocator, FormatStrFormatter
         fig = plt.figure("3d face roi", figsize=(8,4))
-        ax = fig.add_subplot(121, projection='3d')
+        ax = fig.add_subplot(121)
         a2 = fig.add_subplot(122)
 
     # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
     # # Handle frame one by one
-
     while(video.isOpened()):
         t += 1.0/fps
         calcTime = time.time()
